@@ -210,3 +210,62 @@ export const migrateLocalToCloud = async () => {
 
   return { success: true, count: successCount };
 };
+
+// -----------------------------------------------------------------------------
+// 4. 用户资料管理 (头像、昵称)
+// -----------------------------------------------------------------------------
+
+export const getUserProfile = async () => {
+  try {
+    const db = Taro.cloud.database();
+    const res = await db.collection('users').get();
+    if (res.data.length > 0) {
+      return res.data[0];
+    }
+    return null;
+  } catch (e) {
+    console.error('Failed to get user profile', e);
+    return null;
+  }
+};
+
+export const saveUserProfile = async (profile) => {
+  try {
+    const db = Taro.cloud.database();
+    const res = await db.collection('users').get();
+    if (res.data.length > 0) {
+      await db.collection('users').doc(res.data[0]._id).update({
+        data: {
+          ...profile,
+          updateTime: db.serverDate()
+        }
+      });
+    } else {
+      await db.collection('users').add({
+        data: {
+          ...profile,
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      });
+    }
+    return true;
+  } catch (e) {
+    console.error('Failed to save user profile', e);
+    return false;
+  }
+};
+
+export const uploadAvatar = async (tempFilePath) => {
+  try {
+    const cloudPath = `avatars/${Date.now()}-${Math.floor(Math.random() * 1000)}.png`;
+    const res = await Taro.cloud.uploadFile({
+      cloudPath,
+      filePath: tempFilePath,
+    });
+    return res.fileID;
+  } catch (e) {
+    console.error('Failed to upload avatar', e);
+    return null;
+  }
+};
