@@ -1,10 +1,16 @@
 import { PropsWithChildren } from 'react'
-import { useLaunch } from '@tarojs/taro'
+import Taro, { useLaunch } from '@tarojs/taro'
 import './app.css'
 
 function App({ children }: PropsWithChildren) {
   useLaunch(() => {
     console.log('App launched.')
+    if (process.env.TARO_ENV === 'weapp') {
+      Taro.cloud.init({
+        env: 'n1-daohen-9ga3v5k246792d59',
+        traceUser: true,
+      })
+    }
   })
 
   // children 是将要会渲染的页面

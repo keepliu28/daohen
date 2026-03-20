@@ -1,5 +1,6 @@
 {
   "miniprogramRoot": "dist/",
+  "cloudfunctionRoot": "cloudfunctions/",
   "projectname": "daohen-weapp",
   "description": "基于路飞老师的方法论搭建的笔记工具",
   "appid": "wx4098138fe5a33e1c",
