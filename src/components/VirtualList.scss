@@ -1,0 +1,57 @@
+.virtual-list-container {
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.virtual-list-wrapper {
+  position: relative;
+}
+
+.virtual-list-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+.virtual-list-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+}
+
+// 懒加载样式
+.lazy-image {
+  background: #f5f5f5;
+  position: relative;
+  overflow: hidden;
+  
+  &.loaded {
+    background: transparent;
+  }
+}
+
+.lazy-image-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

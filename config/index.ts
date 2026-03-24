@@ -21,6 +21,10 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
       "@tarojs/plugin-generator"
     ],
     defineConstants: {
+      CLOUD_ENV: JSON.stringify(process.env.NODE_ENV === 'development' ? 
+        (devConfig as any).cloudEnv || 'n1-daohen-9ga3v5k246792d59' : 
+        (prodConfig as any).cloudEnv || 'n1-daohen-9ga3v5k246792d59'
+      ),
     },
     copy: {
       patterns: [

@@ -1,35 +1,30 @@
 import Taro from '@tarojs/taro';
 
-const STORAGE_KEY = 'DAOHEN_ENTRIES';
 const DB_COLLECTION = 'entries';
 
 // -----------------------------------------------------------------------------
 // 1. 登录与用户管理
 // -----------------------------------------------------------------------------
 
-/**
- * 调用云函数获取用户 OpenID
- */
-export const login = async () => {
-  try {
-    const res = await Taro.cloud.callFunction({
-      name: 'login',
-      data: {}
-    });
-    const openid = res.result.openid;
-    Taro.setStorageSync('USER_OPENID', openid);
-    return openid;
-  } catch (error) {
-    console.error('Login failed:', error);
-    return null;
-  }
+// 统一的存储键名常量
+const STORAGE_KEYS = {
+  OPENID: 'openid',
+  USER_PROFILE: 'user_profile',
+  ENTRIES: 'DAOHEN_ENTRIES'
 };
 
 /**
  * 获取当前用户的 OpenID
  */
 export const getOpenId = () => {
-  return Taro.getStorageSync('USER_OPENID');
+  return Taro.getStorageSync(STORAGE_KEYS.OPENID);
+};
+
+/**
+ * 设置当前用户的 OpenID
+ */
+export const setOpenId = (openid: string) => {
+  Taro.setStorageSync(STORAGE_KEYS.OPENID, openid);
 };
 
 // -----------------------------------------------------------------------------
@@ -39,12 +34,11 @@ export const getOpenId = () => {
 /**
  * 获取所有日记 (从云端获取)
  */
-export const getEntries = async () => {
+export const getEntries = async (limit: number = 20, offset: number = 0) => {
   try {
     const db = Taro.cloud.database();
-    const res = await db.collection(DB_COLLECTION).orderBy('createTime', 'desc').get();
+    const res = await db.collection(DB_COLLECTION).orderBy('createTime', 'desc').limit(limit).skip(offset).get();
     
-    // 将云端数据同步到本地缓存
     const entries = res.data.map(item => {
       // 兼容旧的 id 字段
       if (!item.id && item._id) {
@@ -52,11 +46,12 @@ export const getEntries = async () => {
       }
       return item;
     });
-    Taro.setStorageSync(STORAGE_KEY, entries);
     return entries;
   } catch (error) {
-    console.error('Failed to get entries from cloud, falling back to local:', error);
-    return Taro.getStorageSync(STORAGE_KEY) || [];
+    console.error('Failed to get entries from cloud:', error);
+    // 当云端获取失败时，不再尝试从本地获取所有，因为本地可能也存储了大量数据。
+    // 此时应该返回空数组或抛出错误，让上层决定如何处理。
+    return [];
   }
 };
 
@@ -107,7 +102,7 @@ export const saveEntry = async (entry) => {
     }
     
     // 更新本地缓存
-    const entries = Taro.getStorageSync(STORAGE_KEY) || [];
+    const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
     const existingIndex = entries.findIndex(e => (e.id === entry.id || e._id === entry._id));
     
     let newEntries;
@@ -117,13 +112,13 @@ export const saveEntry = async (entry) => {
     } else {
       newEntries = [entry, ...entries];
     }
-    Taro.setStorageSync(STORAGE_KEY, newEntries);
+    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
     
     return newEntries;
   } catch (error) {
     console.error('Failed to save entry to cloud:', error);
     // 降级：仅保存到本地
-    const entries = Taro.getStorageSync(STORAGE_KEY) || [];
+    const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
     const existingIndex = entries.findIndex(e => e.id === entry.id);
     let newEntries;
     if (existingIndex >= 0) {
@@ -132,7 +127,7 @@ export const saveEntry = async (entry) => {
     } else {
       newEntries = [entry, ...entries];
     }
-    Taro.setStorageSync(STORAGE_KEY, newEntries);
+    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
     return newEntries;
   }
 };
@@ -146,17 +141,17 @@ export const deleteEntryById = async (id) => {
     await db.collection(DB_COLLECTION).doc(id).remove();
     
     // 更新本地缓存
-    const entries = Taro.getStorageSync(STORAGE_KEY) || [];
+    const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
     const newEntries = entries.filter(e => e.id !== id && e._id !== id);
-    Taro.setStorageSync(STORAGE_KEY, newEntries);
+    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
     
     return newEntries;
   } catch (error) {
     console.error('Failed to delete entry from cloud:', error);
     // 降级：仅从本地删除
-    const entries = Taro.getStorageSync(STORAGE_KEY) || [];
+    const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
     const newEntries = entries.filter(e => e.id !== id && e._id !== id);
-    Taro.setStorageSync(STORAGE_KEY, newEntries);
+    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
     return newEntries;
   }
 };
@@ -170,7 +165,7 @@ export const deleteEntryById = async (id) => {
  * 建议在设置页提供一个按钮手动触发，或者在应用启动时检测并自动触发
  */
 export const migrateLocalToCloud = async () => {
-  const localEntries = Taro.getStorageSync(STORAGE_KEY) || [];
+  const localEntries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
   if (localEntries.length === 0) {
     console.log('No local data to migrate.');
     return { success: true, count: 0 };
@@ -269,3 +264,324 @@ export const uploadAvatar = async (tempFilePath) => {
     return null;
   }
 };
+
+// 云开发状态检查函数
+export const checkCloudStatus = async (): Promise<{ available: boolean; error?: string; details?: any }> => {
+  if (!Taro.cloud) {
+    console.error('[云开发] 云开发功能不可用');
+    return { 
+      available: false, 
+      error: '云开发功能未启用，请检查小程序配置',
+      details: { type: 'cloud_not_available' }
+    };
+  }
+  
+  try {
+    // 测试云函数
+    const testRes = await Taro.cloud.callFunction({
+      name: 'login',
+      data: {}
+    });
+    console.log('[云开发] 云函数测试通过:', testRes);
+    
+    // 测试数据库
+    const db = Taro.cloud.database();
+    const dbTest = await db.collection('entries').limit(1).get();
+    console.log('[云开发] 数据库测试通过:', dbTest);
+    
+    return { 
+      available: true,
+      details: { 
+        cloudFunction: true, 
+        database: true,
+        timestamp: new Date().toISOString()
+      }
+    };
+  } catch (error: any) {
+    console.error('[云开发] 功能测试失败:', error);
+    
+    let errorMessage = '云开发服务异常';
+    let errorType = 'unknown';
+    
+    if (error.errCode) {
+      switch (error.errCode) {
+        case -404011:
+          errorMessage = '云函数不存在，请检查云函数部署状态';
+          errorType = 'function_not_found';
+          break;
+        case -501000:
+          errorMessage = '数据库连接失败，请检查网络连接';
+          errorType = 'database_connection_failed';
+          break;
+        case -401003:
+          errorMessage = '云开发环境配置错误，请检查环境ID';
+          errorType = 'env_config_error';
+          break;
+        default:
+          errorMessage = `云开发服务异常 (错误码: ${error.errCode})`;
+          errorType = 'cloud_service_error';
+      }
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    return { 
+      available: false, 
+      error: errorMessage,
+      details: { 
+        type: errorType,
+        errCode: error.errCode,
+        message: error.message
+      }
+    };
+  }
+};
+
+// 重试机制函数
+export const retryOperation = async <T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  delay: number = 1000
+): Promise<T> => {
+  let lastError: any;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      console.warn(`[重试] 第 ${attempt + 1} 次尝试失败:`, error);
+      
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError;
+};
+
+// 带重试的数据获取
+export const getEntriesWithRetry = async (maxRetries: number = 2) => {
+  return retryOperation(() => getEntries(), maxRetries);
+};
+
+// 带重试的数据保存
+export const saveEntryWithRetry = async (entry: any, maxRetries: number = 2) => {
+  return retryOperation(() => saveEntry(entry), maxRetries);
+};
+
+// -----------------------------------------------------------------------------
+// 5. 数据同步策略优化
+// -----------------------------------------------------------------------------
+
+// 冲突解决策略
+export const resolveConflict = (localEntry: any, cloudEntry: any): any => {
+  // 优先使用较新的数据
+  const localTime = localEntry.updateTime || localEntry.createTime;
+  const cloudTime = cloudEntry.updateTime || cloudEntry.createTime;
+  
+  if (localTime > cloudTime) {
+    console.log('[数据同步] 使用本地数据，本地数据较新');
+    return { ...cloudEntry, ...localEntry, _id: cloudEntry._id };
+  } else {
+    console.log('[数据同步] 使用云端数据，云端数据较新');
+    return { ...localEntry, ...cloudEntry, id: cloudEntry._id };
+  }
+};
+
+// 智能数据同步
+export const syncEntries = async (): Promise<{ success: boolean; synced: number; errors: number }> => {
+  try {
+    console.log('[数据同步] 开始智能同步');
+    
+    // 获取本地数据
+    const localEntries: any[] = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
+    
+    // 获取云端数据
+    const db = Taro.cloud.database();
+    const cloudRes = await db.collection(DB_COLLECTION).orderBy('updateTime', 'desc').get();
+    const cloudEntries = cloudRes.data;
+    
+    let synced = 0;
+    let errors = 0;
+    
+    // 创建映射表
+    const localMap = new Map(localEntries.map(entry => [entry.id || entry._id, entry]));
+    const cloudMap = new Map(cloudEntries.map(entry => [entry._id, entry]));
+    
+    // 同步策略：双向同步
+    const allIds = new Set([...localMap.keys(), ...cloudMap.keys()]);
+    const mergedEntries: any[] = [];
+    
+    for (const id of allIds) {
+      const localEntry = localMap.get(id);
+      const cloudEntry = cloudMap.get(id);
+      
+      try {
+        if (localEntry && cloudEntry) {
+          // 冲突解决
+          const resolvedEntry = resolveConflict(localEntry, cloudEntry);
+          mergedEntries.push(resolvedEntry);
+          
+          // 如果数据不一致，更新到云端
+          if (JSON.stringify(localEntry) !== JSON.stringify(cloudEntry)) {
+            await saveEntry(resolvedEntry);
+            synced++;
+          }
+        } else if (localEntry && !cloudEntry) {
+          // 本地有，云端没有 -> 上传到云端
+          await saveEntry(localEntry);
+          mergedEntries.push(localEntry);
+          synced++;
+        } else if (!localEntry && cloudEntry) {
+          // 云端有，本地没有 -> 下载到本地
+          mergedEntries.push(cloudEntry);
+          synced++;
+        }
+      } catch (error) {
+        console.error(`[数据同步] 同步记录 ${id} 失败:`, error);
+        errors++;
+        
+        // 失败时保留现有数据
+        if (localEntry) mergedEntries.push(localEntry);
+        else if (cloudEntry) mergedEntries.push(cloudEntry);
+      }
+    }
+    
+    // 更新本地存储
+    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, mergedEntries.sort((a, b) => 
+      (b.updateTime || b.createTime) - (a.updateTime || a.createTime)
+    ));
+    
+    console.log(`[数据同步] 同步完成: 成功 ${synced} 条，失败 ${errors} 条`);
+    
+    return { success: errors === 0, synced, errors };
+  } catch (error) {
+    console.error('[数据同步] 同步过程失败:', error);
+    return { success: false, synced: 0, errors: 1 };
+  }
+};
+
+// 增量同步（仅同步最近更改的数据）
+export const incrementalSync = async (since: number = Date.now() - 24 * 60 * 60 * 1000): Promise<{ success: boolean; updated: number }> => {
+  try {
+    console.log('[增量同步] 开始同步最近更改的数据');
+    
+    const db = Taro.cloud.database();
+    const localEntries: any[] = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
+    
+    // 获取云端最近更新的数据
+    const cloudRes = await db.collection(DB_COLLECTION)
+      .where({
+        updateTime: db.command.gte(since)
+      })
+      .orderBy('updateTime', 'desc')
+      .get();
+    
+    const updatedEntries = cloudRes.data;
+    let updated = 0;
+    
+    // 合并更新
+    const localMap = new Map(localEntries.map(entry => [entry.id || entry._id, entry]));
+    
+    for (const cloudEntry of updatedEntries) {
+      const localEntry = localMap.get(cloudEntry._id);
+      
+      if (!localEntry || (cloudEntry.updateTime > (localEntry.updateTime || 0))) {
+        // 更新本地数据
+        const index = localEntries.findIndex(e => (e.id || e._id) === cloudEntry._id);
+        if (index >= 0) {
+          localEntries[index] = { ...localEntries[index], ...cloudEntry };
+        } else {
+          localEntries.unshift(cloudEntry);
+        }
+        updated++;
+      }
+    }
+    
+    // 保存更新后的数据
+    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, localEntries);
+    
+    console.log(`[增量同步] 完成: 更新了 ${updated} 条记录`);
+    return { success: true, updated };
+  } catch (error) {
+    console.error('[增量同步] 失败:', error);
+    return { success: false, updated: 0 };
+  }
+};
+
+// 自动同步触发器
+export const autoSync = async () => {
+  try {
+    // 检查网络状态
+    const networkInfo = await Taro.getNetworkType();
+    if (networkInfo.networkType === 'none') {
+      console.log('[自动同步] 网络不可用，跳过同步');
+      return { success: true, skipped: true };
+    }
+    
+    // 检查上次同步时间
+    const lastSync = Taro.getStorageSync('LAST_SYNC_TIME') || 0;
+    const now = Date.now();
+    
+    // 如果距离上次同步超过5分钟，执行增量同步
+    if (now - lastSync > 5 * 60 * 1000) {
+      const result = await incrementalSync(lastSync);
+      if (result.success) {
+        Taro.setStorageSync('LAST_SYNC_TIME', now);
+      }
+      return result;
+    }
+    
+    return { success: true, skipped: true };
+  } catch (error) {
+    console.error('[自动同步] 失败:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// 改进登录函数
+export const login = async () => {
+  // 先检查云开发状态
+  const status = await checkCloudStatus();
+  if (!status.available) {
+    Taro.showModal({
+      title: '云开发不可用',
+      content: status.error || '请检查网络连接',
+      showCancel: false,
+      confirmText: '确定'
+    });
+    throw new Error('云开发不可用');
+  }
+  
+  try {
+    console.log('[登录] 开始云登录');
+    const res = await Taro.cloud.callFunction({
+      name: 'login',
+      data: {}
+    });
+    
+    const openid = res.result.openid;
+    setOpenId(openid);
+    console.log('[登录] 登录成功，openid:', openid);
+    
+    Taro.showToast({ 
+      title: '登录成功', 
+      icon: 'success',
+      duration: 1500
+    });
+    
+    return openid;
+  } catch (error: any) {
+    console.error('[登录] 登录失败:', error);
+    Taro.showModal({
+      title: '登录失败',
+      content: error.message || '请检查网络连接',
+      showCancel: false,
+      confirmText: '确定'
+    });
+    throw error;
+  }
+};
+

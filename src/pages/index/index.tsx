@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { View, Text, Textarea, ScrollView, Input, Picker, MovableArea, MovableView, Image, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { getEntries, saveEntry, deleteEntryById, getUserProfile, saveUserProfile, uploadAvatar } from '../../utils/storage'
+import { getEntries, saveEntry, deleteEntryById, getUserProfile, saveUserProfile, uploadAvatar, autoSync } from '../../utils/storage'
+import { debounce, throttle, paginateData, PerformanceMonitor } from '../../utils/performance'
+import LoginModal from '../../components/LoginModal'
+import WechatLogin from '../../components/WechatLogin'
+import VirtualList from '../../components/VirtualList'
+import LazyImage from '../../components/LazyImage'
 import './index.scss'
 
 const MOODS = [
@@ -61,8 +66,12 @@ const STEPS = [
 
 const LUNAR_DAYS = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十', '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十']
 
+const PAGE_LIMIT = 10; // 每页加载10条数据
+
 export default function Index() {
   const [view, setView] = useState('home')
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [entries, setEntries] = useState<any[]>([])
   const [isDiving, setIsDiving] = useState(false)
   const [currentStep, setCurrentStep] = useState(-1)
@@ -84,114 +93,77 @@ export default function Index() {
   const [sysInfo, setSysInfo] = useState({ windowWidth: 375, windowHeight: 812 })
   const [userProfile, setUserProfile] = useState<any>(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showWechatLogin, setShowWechatLogin] = useState(false)
   const [tempAvatarUrl, setTempAvatarUrl] = useState("")
   const [tempNickName, setTempNickName] = useState("")
+  
+  // 性能优化状态
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(20)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMoreData, setHasMoreData] = useState(true)
+
+  const fetchEntries = async (currentOffset: number, currentEntries: any[]) => {
+    if (!hasMore) return; // 没有更多数据时不再请求
+
+    const newEntries = await getEntries(PAGE_LIMIT, currentOffset);
+    if (newEntries.length < PAGE_LIMIT) {
+      setHasMore(false);
+    }
+    const updatedEntries = [...currentEntries, ...newEntries];
+    setEntries(updatedEntries);
+    setOffset(currentOffset + newEntries.length);
+
+    const tags = Array.from(new Set(updatedEntries.flatMap((e: any) => e.tags ? e.tags.split(/[#\s,，]+/).filter(Boolean) : []))).slice(0, 10);
+    setHistoryTags(tags as string[]);
+
+    // 使用 Web Worker 计算 spherePositions
+    const worker = Taro.createWorker('src/workers/sphere-worker.ts');
+    worker.postMessage({ data: updatedEntries, containerW: sysInfo.windowWidth, containerH: sysInfo.windowHeight * 0.65 });
+    worker.onMessage(res => {
+      setSpherePositions(res.data);
+      worker.terminate(); // 计算完成后终止 Worker
+    });
+  };
 
   useDidShow(() => {
-    const info = Taro.getSystemInfoSync()
-    setSysInfo(info)
+    const perfMonitor = PerformanceMonitor.getInstance();
+    perfMonitor.startMeasure('app_show');
     
+    const info = Taro.getSystemInfoSync();
+    setSysInfo(info);
+
     Taro.onKeyboardHeightChange(res => {
-      setKeyboardHeight(res.height)
-    })
-    
+      setKeyboardHeight(res.height);
+    });
+
+    // 自动同步数据
+    autoSync().then(result => {
+      if (result.success && !result.skipped) {
+        console.log('[自动同步] 同步完成');
+      }
+    });
+
     getUserProfile().then(profile => {
       if (profile) {
-        setUserProfile(profile)
+        setUserProfile(profile);
+      } else {
+        // 如果没有用户资料，显示微信登录
+        setShowWechatLogin(true);
       }
-    })
-    getEntries().then(data => {
-      setEntries(data)
-      const tags = Array.from(new Set(data.flatMap((e: any) => e.tags ? e.tags.split(/[#\s,，]+/).filter(Boolean) : []))).slice(0, 10)
-      setHistoryTags(tags as string[])
-      
-      // 真实的河底：重力沉淀 + 物理防穿模算法 (Circle Packing)
-      const positions: Record<string, any> = {}
-      const allMoods = getAggregatedMoods(data).sort((a, b) => b.count - a.count)
-      
-      const containerW = info.windowWidth
-      const containerH = info.windowHeight * 0.65 // 容器高度
-      const padding = 8 // 石头之间的最小间距
-      
-      // 1. 初始化节点位置 (中心点坐标)
-      let nodes = allMoods.map((mood, i) => {
-        const size = Math.min(80 + mood.count * 12, 160)
-        const radius = size / 2
-        const weightRatio = allMoods.length > 1 ? i / (allMoods.length - 1) : 0
-        
-        // 初始 Y 轴：重的在下，轻的在上
-        const baseY = (containerH - radius - 40) - (weightRatio * containerH * 0.4)
-        let y = baseY + (Math.random() * 40 - 20)
-        
-        // 初始 X 轴：随机分布，稍微向两侧靠拢
-        let x = (containerW / 2) + (Math.random() * containerW * 0.6 - containerW * 0.3)
-        
-        return { id: mood.id, x, y, radius, size, weightRatio }
-      })
-      
-      // 2. 物理碰撞排斥迭代 (Relaxation Loop)
-      for (let iter = 0; iter < 80; iter++) { // 提升迭代精度
-        // 阶段 A：处理所有碰撞排斥
-        for (let i = 0; i < nodes.length; i++) {
-          for (let j = i + 1; j < nodes.length; j++) {
-            const dx = nodes[i].x - nodes[j].x
-            const dy = nodes[i].y - nodes[j].y
-            const dist = Math.sqrt(dx * dx + dy * dy)
-            const minDist = nodes[i].radius + nodes[j].radius + padding
-            
-            if (dist < minDist && dist > 0) {
-              // 发生重叠，计算排斥力
-              const angle = Math.atan2(dy, dx)
-              const overlap = minDist - dist
-              
-              // 互相推开一半的重叠距离
-              const pushX = Math.cos(angle) * (overlap / 2)
-              const pushY = Math.sin(angle) * (overlap / 2)
-              
-              nodes[i].x += pushX
-              nodes[i].y += pushY
-              nodes[j].x -= pushX
-              nodes[j].y -= pushY
-            }
-          }
-        }
-        
-        // 阶段 B：统一处理边界约束 (确保最后一步绝对不越界)
-        for (let i = 0; i < nodes.length; i++) {
-          // 右侧增加额外安全距离 (padding * 2)，防止 MovableArea 滚动条或安全区导致的视觉穿模
-          nodes[i].x = Math.max(nodes[i].radius + padding, Math.min(containerW - nodes[i].radius - padding * 2, nodes[i].x))
-          nodes[i].y = Math.max(nodes[i].radius + padding, Math.min(containerH - nodes[i].radius - padding, nodes[i].y))
-        }
+    });
+
+    // 使用防抖加载数据
+    const loadData = debounce(async () => {
+      // 首次加载数据
+      if (entries.length === 0 && hasMore) {
+        await fetchEntries(0, entries); // Pass current entries for initial load
       }
-      
-      // 4. 转换为 MovableView 需要的左上角坐标
-      nodes.forEach(node => {
-        positions[node.id] = { 
-          x: node.x - node.radius, 
-          y: node.y - node.radius, 
-          size: node.size 
-        }
-      })
-      
-      setSpherePositions(positions)
-    })
+      perfMonitor.endMeasure('app_show');
+    }, 300);
     
-    
-  })
-
-  const getAggregatedMoods = (data: any[]) => {
-    const stats: Record<string, any> = {}
-    data.forEach(entry => {
-      const moodId = entry.mood === 'custom' ? `custom_${entry.customMood}` : entry.mood
-      const label = entry.mood === 'custom' ? entry.customMood : MOODS.find(m => m.id === entry.mood)?.label
-      const icon = entry.mood === 'custom' ? '✨' : MOODS.find(m => m.id === entry.mood)?.icon
-      const color = entry.mood === 'custom' ? '#A78BFA' : MOODS.find(m => m.id === entry.mood)?.color
-      if (!stats[moodId]) stats[moodId] = { id: moodId, label, icon, color, count: 0 }
-      stats[moodId].count++
-    })
-    return Object.values(stats)
-  }
-
+    loadData();
+  });
   const triggerVibrate = (type: 'light' | 'medium' | 'heavy' = 'light') => {
     Taro.vibrateShort({ type })
   }
@@ -251,6 +223,34 @@ export default function Index() {
     const { avatarUrl } = e.detail
     setTempAvatarUrl(avatarUrl)
   }
+
+  // 微信登录成功处理
+  const handleWechatLoginSuccess = (userInfo: any) => {
+    setUserProfile(userInfo);
+    setShowWechatLogin(false);
+    Taro.showToast({ title: '登录成功', icon: 'success' });
+  };
+
+  // 加载更多数据
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMoreData) return;
+    
+    setIsLoadingMore(true);
+    
+    try {
+      const nextPage = currentPage + 1;
+      const paginated = paginateData(entries, nextPage, pageSize);
+      
+      if (paginated.data.length > 0) {
+        setCurrentPage(nextPage);
+        setHasMoreData(paginated.hasMore);
+      }
+    } catch (error) {
+      console.error('[加载更多] 失败:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     if (!tempAvatarUrl || !tempNickName) {
@@ -384,33 +384,7 @@ export default function Index() {
                   <View className='meta-group'>
                     {isDraft && <Text className='status-tag draft'>📝 草稿</Text>}
                     <Text className='entry-card-time'>{new Date(entry.createdAt).getMonth() + 1}月{new Date(entry.createdAt).getDate()}日</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
+
                   </View>
       {showLoginModal && (
         <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
@@ -1875,6 +1849,28 @@ export default function Index() {
             </View>
           </View>
         </View>
+      )}
+
+      {/* 全局模态框组件 */}
+      {showLoginModal && (
+        <LoginModal
+          visible={showLoginModal}
+          userProfile={userProfile}
+          onClose={() => setShowLoginModal(false)}
+          onProfileUpdate={(profile) => {
+            setUserProfile(profile);
+            setShowLoginModal(false);
+            Taro.showToast({ title: '资料保存成功', icon: 'success' });
+          }}
+        />
+      )}
+
+      {showWechatLogin && (
+        <WechatLogin
+          visible={showWechatLogin}
+          onSuccess={handleWechatLoginSuccess}
+          onClose={() => setShowWechatLogin(false)}
+        />
       )}
     </View>
   )
