@@ -4,7 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(20PX) saturate(180%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,137 +14,149 @@
 }
 
 .wechat-login-content {
-  background: white;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+  border-radius: 24PX;
   width: 85%;
-  max-width: 400px;
-  max-height: 80vh;
+  max-width: 420PX;
+  max-height: 85vh;
   overflow-y: auto;
-  animation: slideUp 0.3s ease;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 24PX 48PX rgba(0, 0, 0, 0.15), 0 8PX 16PX rgba(0, 0, 0, 0.1);
 }
 
 .wechat-login-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 16px;
-  border-bottom: 1px solid #F0F0F0;
+  padding: 32PX 32PX 24PX;
+  border-bottom: 1PX solid rgba(0, 0, 0, 0.05);
 }
 
 .wechat-login-title {
-  font-size: 18px;
+  font-size: 22PX;
   font-weight: 600;
-  color: #333;
+  color: #1C1C1E;
+  letter-spacing: -0.5PX;
 }
 
 .wechat-login-close {
-  font-size: 20px;
-  color: #999;
+  font-size: 24PX;
+  color: #8E8E93;
   cursor: pointer;
-  padding: 4px;
+  padding: 4PX;
+  transition: color 0.2s ease;
   
   &:active {
-    color: #666;
+    color: #1C1C1E;
   }
 }
 
 .wechat-login-body {
-  padding: 24px;
+  padding: 32PX;
 }
 
 .login-illustration {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 40PX;
 }
 
 .illustration-icon {
-  font-size: 48px;
+  font-size: 64PX;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 16PX;
+  animation: float 3s ease-in-out infinite;
 }
 
 .illustration-text {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.4;
+  font-size: 17PX;
+  color: #8E8E93;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 .login-options {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 16PX;
+  margin-bottom: 32PX;
 }
 
 .login-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px 24px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 500;
+  padding: 18PX 32PX;
+  border-radius: 16PX;
+  font-size: 17PX;
+  font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.3PX;
   
   &.wechat-btn {
-    background: #07C160;
+    background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
     color: white;
+    box-shadow: 0 8PX 24PX rgba(7, 193, 96, 0.3);
     
     &:active {
-      background: #06A652;
-      transform: translateY(1px);
+      transform: scale(0.98);
+      box-shadow: 0 4PX 12PX rgba(7, 193, 96, 0.2);
     }
     
     &:disabled {
-      background: #B2DFC8;
+      background: linear-gradient(135deg, #B2DFC8 0%, #9FD4B8 100%);
+      box-shadow: none;
       cursor: not-allowed;
     }
   }
   
   &.quick-btn {
-    background: #F8F9FA;
-    color: #333;
-    border: 1px solid #E9ECEF;
+    background: #FFFFFF;
+    color: #1C1C1E;
+    border: 1PX solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4PX 12PX rgba(0, 0, 0, 0.05);
     
     &:active {
-      background: #E9ECEF;
-      transform: translateY(1px);
+      background: #F2F2F7;
+      transform: scale(0.98);
+      box-shadow: 0 2PX 8PX rgba(0, 0, 0, 0.05);
     }
     
     &:disabled {
       background: #F8F9FA;
-      color: #999;
+      color: #C7C7CC;
       cursor: not-allowed;
+      box-shadow: none;
     }
   }
 }
 
 .btn-icon {
-  font-size: 18px;
-  margin-right: 8px;
+  font-size: 20PX;
+  margin-right: 10PX;
 }
 
 .btn-text {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .login-tips {
-  background: #F8F9FA;
-  border-radius: 8px;
-  padding: 16px;
+  background: rgba(242, 242, 247, 0.5);
+  border-radius: 12PX;
+  padding: 20PX;
+  backdrop-filter: blur(10PX);
 }
 
 .tips-text {
-  font-size: 13px;
-  color: #666;
-  line-height: 1.5;
+  font-size: 14PX;
+  color: #8E8E93;
+  line-height: 1.6;
   display: block;
+  font-weight: 500;
   
   &:not(:last-child) {
-    margin-bottom: 4px;
+    margin-bottom: 6PX;
   }
 }
 
@@ -152,25 +165,39 @@
 }
 
 .profile-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 20px;
+  font-size: 17PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 24PX;
   display: block;
+  letter-spacing: -0.3PX;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { 
+    opacity: 0;
+  }
+  to { 
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
   from { 
     opacity: 0; 
-    transform: translateY(30px); 
+    transform: translateY(40PX); 
   }
   to { 
     opacity: 1; 
     transform: translateY(0); 
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10PX);
   }
 }

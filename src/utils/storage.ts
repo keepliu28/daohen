@@ -213,7 +213,14 @@ export const migrateLocalToCloud = async () => {
 export const getUserProfile = async () => {
   try {
     const db = Taro.cloud.database();
-    const res = await db.collection('users').get();
+    const openid = getOpenId();
+    if (!openid) return null;
+    
+    // 使用 openid 作为查询条件，避免全表扫描
+    const res = await db.collection('users').where({
+      _openid: openid
+    }).limit(1).get();
+    
     if (res.data.length > 0) {
       return res.data[0];
     }
@@ -227,7 +234,14 @@ export const getUserProfile = async () => {
 export const saveUserProfile = async (profile) => {
   try {
     const db = Taro.cloud.database();
-    const res = await db.collection('users').get();
+    const openid = getOpenId();
+    if (!openid) return false;
+    
+    // 使用 openid 作为查询条件，避免全表扫描
+    const res = await db.collection('users').where({
+      _openid: openid
+    }).limit(1).get();
+    
     if (res.data.length > 0) {
       await db.collection('users').doc(res.data[0]._id).update({
         data: {
@@ -239,6 +253,7 @@ export const saveUserProfile = async (profile) => {
       await db.collection('users').add({
         data: {
           ...profile,
+          _openid: openid,
           createTime: db.serverDate(),
           updateTime: db.serverDate()
         }
@@ -398,10 +413,20 @@ export const syncEntries = async (): Promise<{ success: boolean; synced: number;
     // 获取本地数据
     const localEntries: any[] = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
     
-    // 获取云端数据
+    // 获取云端数据（按用户筛选，避免全表扫描）
     const db = Taro.cloud.database();
-    const cloudRes = await db.collection(DB_COLLECTION).orderBy('updateTime', 'desc').get();
-    const cloudEntries = cloudRes.data;
+    const openid = getOpenId();
+    let cloudEntries: any[] = [];
+    
+    if (openid) {
+      const cloudRes = await db.collection(DB_COLLECTION)
+        .where({ _openid: openid })
+        .orderBy('updateTime', 'desc')
+        .get();
+      cloudEntries = cloudRes.data;
+    } else {
+      console.warn('[数据同步] 未获取到 openid，跳过云端数据获取');
+    }
     
     let synced = 0;
     let errors = 0;

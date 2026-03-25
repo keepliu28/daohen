@@ -5,6 +5,7 @@ import { getEntries, saveEntry, deleteEntryById, getUserProfile, saveUserProfile
 import { debounce, throttle, paginateData, PerformanceMonitor } from '../../utils/performance'
 import LoginModal from '../../components/LoginModal'
 import WechatLogin from '../../components/WechatLogin'
+import OfficialWechatLogin from '../../components/OfficialWechatLogin'
 import VirtualList from '../../components/VirtualList'
 import LazyImage from '../../components/LazyImage'
 import './index.scss'
@@ -94,6 +95,7 @@ export default function Index() {
   const [userProfile, setUserProfile] = useState<any>(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showWechatLogin, setShowWechatLogin] = useState(false)
+  const [showOfficialLogin, setShowOfficialLogin] = useState(false)
   const [tempAvatarUrl, setTempAvatarUrl] = useState("")
   const [tempNickName, setTempNickName] = useState("")
   
@@ -229,6 +231,17 @@ export default function Index() {
     setUserProfile(userInfo);
     setShowWechatLogin(false);
     Taro.showToast({ title: '登录成功', icon: 'success' });
+  };
+
+  // 官方微信登录成功处理
+  const handleOfficialLoginSuccess = (userInfo: any) => {
+    setUserProfile(userInfo);
+    setShowOfficialLogin(false);
+    Taro.showToast({ title: '登录成功', icon: 'success' });
+    // 刷新数据
+    if (entries.length === 0 && hasMore) {
+      fetchEntries(0, []);
+    }
   };
 
   // 加载更多数据
@@ -1872,6 +1885,13 @@ export default function Index() {
           onClose={() => setShowWechatLogin(false)}
         />
       )}
+
+      {/* 官方微信登录组件 */}
+      <OfficialWechatLogin
+        visible={showOfficialLogin}
+        onSuccess={handleOfficialLoginSuccess}
+        onClose={() => setShowOfficialLogin(false)}
+      />
     </View>
   )
 }

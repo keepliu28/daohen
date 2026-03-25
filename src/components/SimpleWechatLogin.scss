@@ -1,0 +1,204 @@
+.simple-login-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(2, 6, 23, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+  backdrop-filter: blur(20PX) saturate(180%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+.simple-login-content {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: 32PX;
+  width: 85%;
+  max-width: 400PX;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 24PX 48PX rgba(0, 0, 0, 0.15), 0 8PX 16PX rgba(0, 0, 0, 0.1);
+}
+
+.simple-login-header {
+  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  padding: 40PX 32PX 32PX;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-decoration {
+  display: flex;
+  justify-content: center;
+  gap: 12PX;
+}
+
+.decoration-dot {
+  width: 8PX;
+  height: 8PX;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.decoration-dot:nth-of-type(2) {
+  animation-delay: 0.2s;
+}
+
+.decoration-dot:nth-of-type(3) {
+  animation-delay: 0.4s;
+}
+
+.simple-login-body {
+  padding: 48PX 32PX 32PX;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.app-logo {
+  width: 96PX;
+  height: 96PX;
+  border-radius: 24PX;
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24PX;
+  box-shadow: 0 12PX 24PX rgba(59, 130, 246, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+.logo-icon {
+  font-size: 48PX;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-family: 'PingFang SC', sans-serif;
+}
+
+.app-title {
+  font-size: 28PX;
+  font-weight: 700;
+  color: #1E293B;
+  margin-bottom: 8PX;
+  letter-spacing: -0.5PX;
+}
+
+.app-subtitle {
+  font-size: 15PX;
+  color: #64748B;
+  margin-bottom: 48PX;
+  font-weight: 500;
+}
+
+.login-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wechat-login-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 16PX;
+  padding: 20PX 32PX;
+  font-size: 17PX;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8PX 24PX rgba(7, 193, 96, 0.3);
+  letter-spacing: -0.3PX;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 4PX 12PX rgba(7, 193, 96, 0.2);
+  }
+  
+  &:disabled {
+    background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12PX;
+}
+
+.wechat-icon {
+  font-size: 20PX;
+}
+
+.btn-text {
+  font-weight: 600;
+}
+
+.login-tips {
+  margin-top: 24PX;
+  font-size: 13PX;
+  color: #94A3B8;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.simple-login-footer {
+  padding: 24PX 32PX;
+  background: rgba(241, 245, 249, 0.5);
+  text-align: center;
+}
+
+.footer-text {
+  font-size: 13PX;
+  color: #64748B;
+  font-weight: 500;
+  letter-spacing: 1PX;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0;
+  }
+  to { 
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(40PX); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10PX);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
