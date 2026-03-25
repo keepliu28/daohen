@@ -119,13 +119,34 @@ export default function Index() {
     const tags = Array.from(new Set(updatedEntries.flatMap((e: any) => e.tags ? e.tags.split(/[#\s,，]+/).filter(Boolean) : []))).slice(0, 10);
     setHistoryTags(tags as string[]);
 
-    // 使用 Web Worker 计算 spherePositions
-    const worker = Taro.createWorker('src/workers/sphere-worker.ts');
-    worker.postMessage({ data: updatedEntries, containerW: sysInfo.windowWidth, containerH: sysInfo.windowHeight * 0.65 });
-    worker.onMessage(res => {
-      setSpherePositions(res.data);
-      worker.terminate(); // 计算完成后终止 Worker
+    // 同步计算 spherePositions（移除 Worker 依赖）
+    const positions = calculateSpherePositionsSync(updatedEntries, sysInfo.windowWidth, sysInfo.windowHeight * 0.65);
+    setSpherePositions(positions);
+  };
+
+  // 同步计算球体位置（替代 Worker）
+  const calculateSpherePositionsSync = (entries: any[], containerW: number, containerH: number) => {
+    const aggregatedMoods = getAggregatedMoods(entries);
+    const positions: { [key: string]: { x: number; y: number; size: number } } = {};
+    
+    if (aggregatedMoods.length === 0) return positions;
+    
+    const centerX = containerW / 2;
+    const centerY = containerH / 2;
+    const maxRadius = Math.min(containerW, containerH) * 0.3;
+    
+    aggregatedMoods.forEach((mood, index) => {
+      const angle = (index / aggregatedMoods.length) * 2 * Math.PI;
+      const radius = maxRadius * (0.5 + Math.random() * 0.5);
+      
+      positions[mood.id] = {
+        x: centerX + radius * Math.cos(angle) - 50,
+        y: centerY + radius * Math.sin(angle) - 50,
+        size: 80 + (mood.count * 5)
+      };
     });
+    
+    return positions;
   };
 
   useDidShow(() => {
@@ -150,8 +171,8 @@ export default function Index() {
       if (profile) {
         setUserProfile(profile);
       } else {
-        // 如果没有用户资料，显示微信登录
-        setShowWechatLogin(true);
+        // 如果没有用户资料，显示官方微信登录（统一使用官方组件）
+        setShowOfficialLogin(true);
       }
     });
 
@@ -225,6 +246,25 @@ export default function Index() {
     const { avatarUrl } = e.detail
     setTempAvatarUrl(avatarUrl)
   }
+
+  // 获取聚合心情数据
+  const getAggregatedMoods = (entries: any[]) => {
+    const moodCounts: { [key: string]: number } = {};
+    
+    entries.forEach(entry => {
+      if (entry.mood) {
+        moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+      }
+    });
+
+    return MOODS.map(mood => ({
+      id: mood.id,
+      icon: mood.icon,
+      label: mood.label,
+      color: mood.color,
+      count: moodCounts[mood.id] || 0
+    })).filter(mood => mood.count > 0);
+  };
 
   // 微信登录成功处理
   const handleWechatLoginSuccess = (userInfo: any) => {
@@ -624,7 +664,16 @@ export default function Index() {
       {(view === 'home' || view === 'calendar' || view === 'mood' || view === 'mood-detail') && (
         <View className='top-header'>
           {!isSearchMode ? (
-            <><View className='user-avatar-btn' onClick={() => { setShowLoginModal(true); triggerVibrate('light'); }}>{userProfile ? <Image src={userProfile.avatarUrl} className='avatar-img' /> : <View className='avatar-placeholder'>👤</View>}</View>
+            <><View className='user-avatar-btn' onClick={() => { 
+              if (userProfile) {
+                setShowLoginModal(true); 
+                triggerVibrate('light'); 
+              } else {
+                // 未登录时使用官方微信登录
+                setShowOfficialLogin(true);
+                triggerVibrate('light');
+              }
+            }}>{userProfile ? <Image src={userProfile.avatarUrl} className='avatar-img' /> : <View className='avatar-placeholder'>👤</View>}</View>
               <View className='right-icons'><View className='icon-btn' onClick={() => { setView('mood'); triggerVibrate('light'); }}><Text>🔮</Text></View><View className='icon-btn' onClick={() => { setIsSearchMode(true); triggerVibrate('light'); }}><Text>🔍</Text></View></View></>
           ) : (
             <View className='search-bar-container animate-fade-in'><View className='search-input-wrapper'><Text className='search-icon'>🔍</Text><Input className='search-input-main' placeholder='搜索道痕...' value={searchKeyword} onInput={(e) => setSearchKeyword(e.detail.value)} autoFocus /></View><Text className='search-cancel-btn' onClick={() => { setIsSearchMode(false); setSearchKeyword(''); triggerVibrate('light'); }}>取消</Text></View>

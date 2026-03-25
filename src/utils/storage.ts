@@ -117,7 +117,15 @@ export const saveEntry = async (entry) => {
     return newEntries;
   } catch (error) {
     console.error('Failed to save entry to cloud:', error);
-    // 降级：仅保存到本地
+    
+    // 明确区分权限错误和其他错误
+    if (error.errCode === -502003) {
+      // 权限错误：明确告知用户需要配置权限
+      throw new Error('数据库权限被拒绝，请检查云开发控制台权限配置');
+    }
+    
+    // 其他错误：降级到本地保存，但明确告知用户
+    console.warn('云端保存失败，降级到本地保存');
     const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
     const existingIndex = entries.findIndex(e => e.id === entry.id);
     let newEntries;
@@ -128,7 +136,13 @@ export const saveEntry = async (entry) => {
       newEntries = [entry, ...entries];
     }
     Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
-    return newEntries;
+    
+    // 返回降级结果，但标记为降级
+    return { 
+      entries: newEntries, 
+      isFallback: true,
+      error: error.message 
+    };
   }
 };
 
@@ -218,7 +232,7 @@ export const getUserProfile = async () => {
     
     // 使用 openid 作为查询条件，避免全表扫描
     const res = await db.collection('users').where({
-      _openid: openid
+      openid: openid
     }).limit(1).get();
     
     if (res.data.length > 0) {
@@ -239,7 +253,7 @@ export const saveUserProfile = async (profile) => {
     
     // 使用 openid 作为查询条件，避免全表扫描
     const res = await db.collection('users').where({
-      _openid: openid
+      openid: openid
     }).limit(1).get();
     
     if (res.data.length > 0) {
@@ -253,7 +267,7 @@ export const saveUserProfile = async (profile) => {
       await db.collection('users').add({
         data: {
           ...profile,
-          _openid: openid,
+          openid: openid,
           createTime: db.serverDate(),
           updateTime: db.serverDate()
         }
@@ -420,7 +434,10 @@ export const syncEntries = async (): Promise<{ success: boolean; synced: number;
     
     if (openid) {
       const cloudRes = await db.collection(DB_COLLECTION)
-        .where({ _openid: openid })
+        .where({
+          // 使用自定义字段存储 openid，避免系统字段冲突
+          openid: openid
+        })
         .orderBy('updateTime', 'desc')
         .get();
       cloudEntries = cloudRes.data;
