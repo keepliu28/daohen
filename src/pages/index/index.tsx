@@ -6,6 +6,8 @@ import { debounce, throttle, paginateData, PerformanceMonitor } from '../../util
 import LoginModal from '../../components/LoginModal'
 import WechatLogin from '../../components/WechatLogin'
 import OfficialWechatLogin from '../../components/OfficialWechatLogin'
+import ModernLoginModal from '../../components/ModernLoginModal'
+import AppleStyleLogin from '../../components/AppleStyleLogin'
 import VirtualList from '../../components/VirtualList'
 import LazyImage from '../../components/LazyImage'
 import './index.scss'
@@ -1915,14 +1917,13 @@ export default function Index() {
 
       {/* 全局模态框组件 */}
       {showLoginModal && (
-        <LoginModal
+        <OfficialWechatLogin
           visible={showLoginModal}
-          userProfile={userProfile}
           onClose={() => setShowLoginModal(false)}
-          onProfileUpdate={(profile) => {
+          onSuccess={(profile) => {
             setUserProfile(profile);
             setShowLoginModal(false);
-            Taro.showToast({ title: '资料保存成功', icon: 'success' });
+            Taro.showToast({ title: '登录成功', icon: 'success' });
           }}
         />
       )}
