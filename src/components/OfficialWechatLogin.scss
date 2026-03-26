@@ -5,8 +5,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: linear-gradient(180deg, #F8F9FA 0%, #E9ECEF 100%);
   display: flex;
   flex-direction: column;
@@ -19,8 +19,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
   pointer-events: none;
 }
@@ -32,22 +32,28 @@
 }
 
 .bg-circle-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  right: -100px;
+  width: 60vw;
+  height: 60vw;
+  max-width: 300px;
+  max-height: 300px;
+  top: -20vw;
+  right: -20vw;
 }
 
 .bg-circle-2 {
-  width: 200px;
-  height: 200px;
+  width: 40vw;
+  height: 40vw;
+  max-width: 200px;
+  max-height: 200px;
   bottom: 10%;
-  left: -50px;
+  left: -10vw;
 }
 
 .bg-circle-3 {
-  width: 150px;
-  height: 150px;
+  width: 30vw;
+  height: 30vw;
+  max-width: 150px;
+  max-height: 150px;
   bottom: 20%;
   right: 10%;
 }
@@ -64,18 +70,22 @@
 
 /* 顶部区域 */
 .login-header-full {
-  padding: 60px 32px 40px;
+  padding: 12vh 8vw 8vh;
   text-align: center;
   flex-shrink: 0;
 }
 
 .brand-logo-container {
-  margin-bottom: 24px;
+  margin-bottom: 4vh;
 }
 
 .brand-logo {
-  width: 80px;
-  height: 80px;
+  width: 20vw;
+  height: 20vw;
+  max-width: 80px;
+  max-height: 80px;
+  min-width: 60px;
+  min-height: 60px;
   margin: 0 auto;
   border-radius: 50%;
   background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
@@ -86,7 +96,7 @@
 }
 
 .brand-logo-text {
-  font-size: 36px;
+  font-size: 9vw;
   font-weight: 700;
   color: #FFFFFF;
   font-family: 'PingFang SC', sans-serif;
@@ -94,16 +104,16 @@
 
 .login-main-title {
   display: block;
-  font-size: 28px;
+  font-size: 7vw;
   font-weight: 700;
   color: #1A1A1A;
-  margin-bottom: 12px;
+  margin-bottom: 2vh;
   line-height: 1.3;
 }
 
 .login-main-subtitle {
   display: block;
-  font-size: 15px;
+  font-size: 4vw;
   color: #666666;
   font-weight: 400;
   line-height: 1.5;
@@ -111,7 +121,7 @@
 
 /* 登录操作区域 */
 .login-action-full {
-  padding: 0 32px;
+  padding: 0 8vw;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -121,12 +131,14 @@
 
 .wechat-login-btn-full {
   width: 100%;
-  height: 56px;
+  height: 12vw;
+  min-height: 48px;
+  max-height: 56px;
   background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
   color: #FFFFFF;
   border: none;
-  border-radius: 12px;
-  font-size: 18px;
+  border-radius: 3vw;
+  font-size: 4.5vw;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -151,17 +163,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 3vw;
 }
 
 .btn-icon-full {
-  font-size: 22px;
+  font-size: 5.5vw;
 }
 
 .login-tip-full {
   display: block;
-  margin-top: 16px;
-  font-size: 13px;
+  margin-top: 4vh;
+  font-size: 3.5vw;
   color: #999999;
   text-align: center;
   line-height: 1.5;
@@ -169,13 +181,13 @@
 
 /* 底部区域 */
 .login-footer-full {
-  padding: 24px 32px;
+  padding: 6vh 8vw;
   text-align: center;
   flex-shrink: 0;
 }
 
 .footer-text-full {
-  font-size: 12px;
+  font-size: 3vw;
   color: #CCCCCC;
   font-weight: 400;
   letter-spacing: 0.5px;
@@ -186,13 +198,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0 32px 32px;
+  padding: 0 8vw 8vh;
   overflow-y: auto;
 }
 
 /* 头像选择区域 - 圆形设计 */
 .avatar-section-full {
-  margin-bottom: 32px;
+  margin-bottom: 8vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -200,16 +212,20 @@
 
 .section-label-full {
   display: block;
-  font-size: 16px;
+  font-size: 4vw;
   font-weight: 600;
   color: #333333;
-  margin-bottom: 20px;
+  margin-bottom: 5vh;
   text-align: center;
 }
 
 .avatar-btn-circle {
-  width: 140px;
-  height: 140px;
+  width: 35vw;
+  height: 35vw;
+  max-width: 140px;
+  max-height: 140px;
+  min-width: 100px;
+  min-height: 100px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(241, 245, 249, 0.8) 0%, rgba(248, 250, 252, 0.6) 100%);
   border: 3px dashed rgba(7, 193, 96, 0.3);
@@ -241,35 +257,37 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 2vw;
 }
 
 .avatar-circle-icon {
-  font-size: 32px;
+  font-size: 8vw;
   opacity: 0.6;
 }
 
 .avatar-circle-text {
-  font-size: 12px;
+  font-size: 3vw;
   color: #999999;
   font-weight: 500;
 }
 
 /* 昵称输入区域 */
 .nickname-section-full {
-  margin-bottom: 32px;
+  margin-bottom: 8vh;
 }
 
 .input-wrapper-full {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 0 16px;
-  border-radius: 12px;
+  padding: 0 4vw;
+  border-radius: 3vw;
   background: #FFFFFF;
   border: 2px solid #F0F0F0;
   transition: all 0.3s ease;
-  height: 56px;
+  height: 14vw;
+  min-height: 48px;
+  max-height: 56px;
   
   &:focus-within {
     border-color: #07C160;
@@ -279,20 +297,20 @@
 }
 
 .input-icon-full {
-  font-size: 20px;
-  padding-right: 12px;
+  font-size: 5vw;
+  padding-right: 3vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 56px;
+  height: 14vw;
   opacity: 0.6;
 }
 
 .nickname-input-full {
   flex: 1;
-  height: 56px;
-  line-height: 56px;
-  font-size: 16px;
+  height: 14vw;
+  line-height: 14vw;
+  font-size: 4vw;
   color: #333333;
   background: transparent;
   border: none;
@@ -313,11 +331,13 @@
 
 .save-btn-full {
   width: 100%;
-  height: 56px;
-  border-radius: 12px;
+  height: 12vw;
+  min-height: 48px;
+  max-height: 56px;
+  border-radius: 3vw;
   background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
   color: #FFFFFF;
-  font-size: 18px;
+  font-size: 4.5vw;
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -343,11 +363,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 2vw;
 }
 
 .loading-spinner-full {
-  font-size: 18px;
+  font-size: 4.5vw;
   animation: spin 1s linear infinite;
 }
 
@@ -358,6 +378,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* 响应式断点 */
+@media screen and (min-width: 768px) {
+  .brand-logo-text { font-size: 36px; }
+  .login-main-title { font-size: 28px; }
+  .login-main-subtitle { font-size: 15px; }
+  .wechat-login-btn-full { font-size: 18px; }
+  .btn-icon-full { font-size: 22px; }
+  .login-tip-full { font-size: 13px; }
+  .footer-text-full { font-size: 12px; }
+  .section-label-full { font-size: 16px; }
+  .avatar-circle-icon { font-size: 32px; }
+  .avatar-circle-text { font-size: 12px; }
+  .input-icon-full { font-size: 20px; }
+  .nickname-input-full { font-size: 16px; }
+  .save-btn-full { font-size: 18px; }
+  .loading-spinner-full { font-size: 18px; }
 }
 
 @keyframes fadeIn {

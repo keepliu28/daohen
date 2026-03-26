@@ -10,7 +10,8 @@ const DB_COLLECTION = 'entries';
 const STORAGE_KEYS = {
   OPENID: 'openid',
   USER_PROFILE: 'user_profile',
-  ENTRIES: 'DAOHEN_ENTRIES'
+  ENTRIES: 'DAOHEN_ENTRIES',
+  LOGIN_TIMESTAMP: 'login_timestamp'
 };
 
 /**
@@ -25,6 +26,78 @@ export const getOpenId = () => {
  */
 export const setOpenId = (openid: string) => {
   Taro.setStorageSync(STORAGE_KEYS.OPENID, openid);
+  // 记录登录时间戳
+  Taro.setStorageSync(STORAGE_KEYS.LOGIN_TIMESTAMP, Date.now());
+};
+
+/**
+ * 获取用户资料
+ */
+export const getUserProfile = () => {
+  return Taro.getStorageSync(STORAGE_KEYS.USER_PROFILE);
+};
+
+/**
+ * 保存用户资料
+ */
+export const saveUserProfile = (profile: any) => {
+  Taro.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
+};
+
+/**
+ * 检查登录状态是否有效
+ * @returns Promise<boolean>
+ */
+export const checkLoginStatus = async (): Promise<boolean> => {
+  const openid = getOpenId();
+  const loginTimestamp = Taro.getStorageSync(STORAGE_KEYS.LOGIN_TIMESTAMP);
+  
+  // 如果没有 openid，说明未登录
+  if (!openid) {
+    return false;
+  }
+  
+  // 检查登录时间是否超过7天（需要重新登录）
+  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+  if (Date.now() - loginTimestamp > sevenDays) {
+    clearLoginData();
+    return false;
+  }
+  
+  try {
+    // 检查云函数会话是否有效
+    await Taro.cloud.callFunction({
+      name: 'checkSession',
+      timeout: 5000
+    });
+    return true;
+  } catch (error) {
+    console.warn('会话检查失败:', error);
+    // 会话失效，清除登录数据
+    clearLoginData();
+    return false;
+  }
+};
+
+/**
+ * 清除登录数据
+ */
+export const clearLoginData = () => {
+  Taro.removeStorageSync(STORAGE_KEYS.OPENID);
+  Taro.removeStorageSync(STORAGE_KEYS.USER_PROFILE);
+  Taro.removeStorageSync(STORAGE_KEYS.LOGIN_TIMESTAMP);
+};
+
+/**
+ * 获取登录状态信息
+ */
+export const getLoginInfo = () => {
+  return {
+    openid: getOpenId(),
+    userProfile: getUserProfile(),
+    loginTimestamp: Taro.getStorageSync(STORAGE_KEYS.LOGIN_TIMESTAMP),
+    isLoggedIn: !!getOpenId()
+  };
 };
 
 // -----------------------------------------------------------------------------
@@ -224,7 +297,10 @@ export const migrateLocalToCloud = async () => {
 // 4. 用户资料管理 (头像、昵称)
 // -----------------------------------------------------------------------------
 
-export const getUserProfile = async () => {
+/**
+ * 从云端获取用户资料
+ */
+export const fetchUserProfileFromCloud = async () => {
   try {
     const db = Taro.cloud.database();
     const openid = getOpenId();
@@ -245,7 +321,10 @@ export const getUserProfile = async () => {
   }
 };
 
-export const saveUserProfile = async (profile) => {
+/**
+ * 保存用户资料到云端
+ */
+export const saveUserProfileToCloud = async (profile) => {
   try {
     const db = Taro.cloud.database();
     const openid = getOpenId();
@@ -267,12 +346,12 @@ export const saveUserProfile = async (profile) => {
       await db.collection('users').add({
         data: {
           ...profile,
-          openid: openid,
           createTime: db.serverDate(),
           updateTime: db.serverDate()
         }
       });
     }
+    
     return true;
   } catch (e) {
     console.error('Failed to save user profile', e);

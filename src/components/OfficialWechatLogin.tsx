@@ -16,19 +16,65 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
 
   if (!visible) return null;
 
+  // 统一的错误处理函数
+  const handleLoginError = (error: any, operation: string) => {
+    console.error(`${operation}失败:`, error);
+    
+    // 根据错误类型提供不同的用户提示
+    if (error.errCode === -502003) {
+      Taro.showModal({
+        title: '权限错误',
+        content: '数据库权限不足，请联系管理员检查权限配置',
+        showCancel: false
+      });
+    } else if (error.errMsg?.includes('network') || error.errMsg?.includes('timeout')) {
+      Taro.showModal({
+        title: '网络异常',
+        content: '网络连接不稳定，请检查网络设置后重试',
+        showCancel: false
+      });
+    } else if (error.errMsg?.includes('auth')) {
+      Taro.showModal({
+        title: '授权失败',
+        content: '微信授权失败，请重新授权',
+        showCancel: false
+      });
+    } else if (error.errMsg?.includes('cloud')) {
+      Taro.showModal({
+        title: '云服务异常',
+        content: '云服务暂时不可用，请稍后重试',
+        showCancel: false
+      });
+    } else {
+      Taro.showToast({ 
+        title: `${operation}失败，请重试`,
+        icon: 'none',
+        duration: 2000
+      });
+    }
+  };
+
   // 处理微信授权按钮点击
   const handleGetUserInfo = async (e: any) => {
     if (isLoading) return;
     
     setIsLoading(true);
-    Taro.showLoading({ title: '获取信息中...' });
+    Taro.showLoading({ 
+      title: '获取信息中...',
+      mask: true
+    });
 
     try {
       const { userInfo } = e.detail;
       
       if (!userInfo) {
         Taro.hideLoading();
-        Taro.showToast({ title: '您已取消授权', icon: 'none' });
+        Taro.showToast({ 
+          title: '您已取消授权', 
+          icon: 'none',
+          duration: 2000
+        });
+        setIsLoading(false);
         return;
       }
 
@@ -40,7 +86,7 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
     } catch (error: any) {
       Taro.hideLoading();
       console.error('获取用户信息失败:', error);
-      Taro.showToast({ title: '获取失败，请重试', icon: 'none' });
+      handleLoginError(error, '获取用户信息');
     } finally {
       setIsLoading(false);
     }
@@ -70,24 +116,32 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
   // 保存用户资料并完成登录
   const handleSaveProfile = async () => {
     if (!pendingUserInfo?.avatarUrl || !pendingUserInfo?.nickName) {
-      Taro.showToast({ title: '请完善头像和昵称', icon: 'none' });
+      Taro.showToast({ 
+        title: '请完善头像和昵称', 
+        icon: 'none',
+        duration: 2000
+      });
       return;
     }
 
     setIsLoading(true);
-    Taro.showLoading({ title: '保存中...' });
+    Taro.showLoading({ 
+      title: '保存中...',
+      mask: true
+    });
 
     try {
       // 获取登录凭证
       const { code } = await Taro.login();
 
-      // 调用云函数获取 openid
+      // 调用云函数获取 openid（添加超时处理）
       const cloudRes = await Taro.cloud.callFunction({
         name: 'login',
         data: {
           code: code,
           userInfo: pendingUserInfo
-        }
+        },
+        timeout: 10000
       });
 
       const openid = cloudRes.result.openid;
@@ -95,6 +149,11 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
       // 上传头像到云存储（如果是临时文件）
       let finalAvatarUrl = pendingUserInfo.avatarUrl;
       if (pendingUserInfo.avatarUrl.startsWith('http://tmp/') || pendingUserInfo.avatarUrl.startsWith('wxfile://')) {
+        Taro.showLoading({ 
+          title: '上传头像中...',
+          mask: true
+        });
+        
         const uploadRes = await Taro.cloud.uploadFile({
           cloudPath: `avatars/${openid}_${Date.now()}.png`,
           filePath: pendingUserInfo.avatarUrl
@@ -137,18 +196,7 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
 
     } catch (error: any) {
       Taro.hideLoading();
-      console.error('登录失败:', error);
-      
-      // 明确提示权限错误
-      if (error.message?.includes('权限')) {
-        Taro.showModal({
-          title: '权限错误',
-          content: error.message,
-          showCancel: false
-        });
-      } else {
-        Taro.showToast({ title: '登录失败，请重试', icon: 'none' });
-      }
+      handleLoginError(error, '登录');
     } finally {
       setIsLoading(false);
     }
