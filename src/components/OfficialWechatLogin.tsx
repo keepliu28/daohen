@@ -146,6 +146,10 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
 
       const openid = cloudRes.result.openid;
 
+      // 先保存 openid 到本地存储，这样 saveUserProfile 才能获取到
+      setOpenId(openid);
+      console.log('[OfficialWechatLogin] openid 已保存到本地存储');
+
       // 上传头像到云存储（如果是临时文件）
       let finalAvatarUrl = pendingUserInfo.avatarUrl;
       if (pendingUserInfo.avatarUrl.startsWith('http://tmp/') || pendingUserInfo.avatarUrl.startsWith('wxfile://')) {
@@ -174,8 +178,13 @@ const OfficialWechatLogin: React.FC<OfficialWechatLoginProps> = ({ visible, onCl
         updateTime: Date.now()
       };
 
-      await saveUserProfile(userProfile);
-      setOpenId(openid);
+      console.log('[OfficialWechatLogin] 开始保存用户信息到数据库...');
+      try {
+        await saveUserProfile(userProfile);
+        console.log('[OfficialWechatLogin] 用户信息保存成功');
+      } catch (saveError) {
+        console.error('[OfficialWechatLogin] 保存用户信息失败:', saveError);
+      }
 
       Taro.hideLoading();
       Taro.showToast({ 

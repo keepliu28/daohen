@@ -18,16 +18,20 @@ const STORAGE_KEYS = {
  * 获取当前用户的 OpenID
  */
 export const getOpenId = () => {
-  return Taro.getStorageSync(STORAGE_KEYS.OPENID);
+  const openid = Taro.getStorageSync(STORAGE_KEYS.OPENID);
+  console.log('[getOpenId] 获取到的 openid:', openid);
+  return openid;
 };
 
 /**
  * 设置当前用户的 OpenID
  */
 export const setOpenId = (openid: string) => {
+  console.log('[setOpenId] 准备保存 openid:', openid);
   Taro.setStorageSync(STORAGE_KEYS.OPENID, openid);
   // 记录登录时间戳
   Taro.setStorageSync(STORAGE_KEYS.LOGIN_TIMESTAMP, Date.now());
+  console.log('[setOpenId] openid 已保存，验证读取:', Taro.getStorageSync(STORAGE_KEYS.OPENID));
 };
 
 /**
@@ -38,10 +42,80 @@ export const getUserProfile = () => {
 };
 
 /**
- * 保存用户资料
+ * 保存用户资料到本地和云端
  */
-export const saveUserProfile = (profile: any) => {
-  Taro.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
+export const saveUserProfile = async (profile: any) => {
+  try {
+    // 1. 保存到本地存储
+    Taro.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
+    
+    // 2. 保存到云端数据库
+    const db = Taro.cloud.database();
+    const openid = getOpenId();
+    
+    console.log('[saveUserProfile] 开始保存用户信息，openid:', openid);
+    
+    if (!openid) {
+      console.error('[saveUserProfile] 未找到 openid，无法保存到云端');
+      return;
+    }
+    
+    try {
+      // 检查用户是否已存在（使用 openid 字段查询）
+      console.log('[saveUserProfile] 查询用户是否存在...');
+      const existingUser = await db.collection('users').where({
+        openid: openid
+      }).limit(1).get();
+      
+      console.log('[saveUserProfile] 查询结果:', existingUser.data.length, '条记录');
+      
+      if (existingUser.data.length > 0) {
+        // 更新现有用户
+        console.log('[saveUserProfile] 更新现有用户...');
+        await db.collection('users').doc(existingUser.data[0]._id).update({
+          data: {
+            ...profile,
+            updateTime: db.serverDate()
+          }
+        });
+        console.log('用户信息已更新到云端');
+      } else {
+        // 新增用户 - 不手动添加 _openid，系统会自动添加
+        console.log('[saveUserProfile] 新增用户...');
+        const addResult = await db.collection('users').add({
+          data: {
+            ...profile,
+            openid: openid,
+            createTime: db.serverDate(),
+            updateTime: db.serverDate()
+          }
+        });
+        console.log('用户信息已新增到云端，_id:', addResult._id);
+      }
+    } catch (dbError) {
+      console.error('[saveUserProfile] 数据库操作失败:', dbError);
+      console.error('[saveUserProfile] 错误详情:', dbError.errCode, dbError.errMsg);
+      
+      // 如果是权限错误，给出明确提示
+      if (dbError.errCode === -502003) {
+        console.error('[saveUserProfile] 数据库权限不足，请检查云开发控制台权限配置');
+        Taro.showModal({
+          title: '权限错误',
+          content: '数据库权限不足，请联系管理员检查 users 集合的权限配置',
+          showCancel: false
+        });
+      }
+      
+      // 抛出错误，让调用方知道保存失败
+      throw dbError;
+    }
+    
+  } catch (error) {
+    console.error('[saveUserProfile] 保存失败:', error);
+    // 即使云端保存失败，也要确保本地保存成功
+    Taro.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
+    throw error; // 重新抛出错误，让调用方知道失败
+  }
 };
 
 /**
@@ -132,6 +206,12 @@ export const getEntries = async (limit: number = 20, offset: number = 0) => {
  * 保存或更新日记 (同步到云端和本地)
  */
 export const saveEntry = async (entry) => {
+  // 检查用户是否登录
+  const openid = getOpenId();
+  if (!openid) {
+    throw new Error('用户未登录，请先登录后再保存日记');
+  }
+  
   const db = Taro.cloud.database();
   const collection = db.collection(DB_COLLECTION);
   
@@ -166,7 +246,7 @@ export const saveEntry = async (entry) => {
     } else {
       // 新增 (没有 id)
       entry.createTime = new Date().getTime();
-      entry.updateTime = new Date().getTime();
+      entry.updateTime = entry.updateTime || new Date().getTime();
       const addRes = await collection.add({
         data: entry
       });
@@ -195,6 +275,11 @@ export const saveEntry = async (entry) => {
     if (error.errCode === -502003) {
       // 权限错误：明确告知用户需要配置权限
       throw new Error('数据库权限被拒绝，请检查云开发控制台权限配置');
+    }
+    
+    // 如果是未登录错误，直接抛出
+    if (error.message === '用户未登录，请先登录后再保存日记') {
+      throw error;
     }
     
     // 其他错误：降级到本地保存，但明确告知用户

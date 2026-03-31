@@ -169,14 +169,14 @@ export default function Index() {
       }
     });
 
-    getUserProfile().then(profile => {
-      if (profile) {
-        setUserProfile(profile);
-      } else {
-        // 如果没有用户资料，显示官方微信登录（统一使用官方组件）
-        setShowOfficialLogin(true);
-      }
-    });
+    // 检查用户资料（同步调用）
+    const profile = getUserProfile();
+    if (profile) {
+      setUserProfile(profile);
+    } else {
+      // 如果没有用户资料，显示官方微信登录（统一使用官方组件）
+      setShowOfficialLogin(true);
+    }
 
     // 使用防抖加载数据
     const loadData = debounce(async () => {
@@ -201,6 +201,25 @@ export default function Index() {
   }
 
   const handleStart = async () => {
+    // 检查用户是否登录
+    const openid = Taro.getStorageSync('openid');
+    if (!openid) {
+      Taro.showModal({
+        title: '提示',
+        content: '请先登录再开始深潜',
+        confirmText: '去登录',
+        confirmColor: '#07C160',
+        success: (res) => {
+          if (res.confirm) {
+            // 打开登录界面
+            setShowOfficialLogin(true);
+            triggerVibrate('light');
+          }
+        }
+      });
+      return;
+    }
+    
     if (isCustomMood && !formData.customMood.trim()) {
       Taro.showToast({ title: '请输入心情', icon: 'none' })
       return

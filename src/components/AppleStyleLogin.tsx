@@ -101,14 +101,22 @@ const AppleStyleLogin: React.FC<AppleStyleLoginProps> = ({ visible, onClose, onS
 
       const openid = cloudRes.result.openid;
 
+      console.log('[AppleStyleLogin] 获取到 openid:', openid);
+
+      // 先保存 openid 到本地存储，这样 saveUserProfile 才能获取到
+      setOpenId(openid);
+      console.log('[AppleStyleLogin] openid 已保存到本地存储');
+
       // 上传头像到云存储（如果是临时文件）
       let finalAvatarUrl = pendingUserInfo.avatarUrl;
       if (pendingUserInfo.avatarUrl && (pendingUserInfo.avatarUrl.startsWith('http://tmp/') || pendingUserInfo.avatarUrl.startsWith('wxfile://'))) {
+        console.log('[AppleStyleLogin] 开始上传头像...');
         const uploadRes = await Taro.cloud.uploadFile({
           cloudPath: `avatars/${openid}_${Date.now()}.png`,
           filePath: pendingUserInfo.avatarUrl
         });
         finalAvatarUrl = uploadRes.fileID;
+        console.log('[AppleStyleLogin] 头像上传成功，fileID:', finalAvatarUrl);
       }
 
       // 保存用户信息到数据库
@@ -124,8 +132,14 @@ const AppleStyleLogin: React.FC<AppleStyleLoginProps> = ({ visible, onClose, onS
         updateTime: Date.now()
       };
 
-      await saveUserProfile(userProfile);
-      setOpenId(openid);
+      console.log('[AppleStyleLogin] 开始保存用户信息到数据库...');
+      try {
+        await saveUserProfile(userProfile);
+        console.log('[AppleStyleLogin] 用户信息保存成功');
+      } catch (saveError) {
+        console.error('[AppleStyleLogin] 保存用户信息失败:', saveError);
+        // 不阻断登录流程，因为本地已经保存了
+      }
 
       Taro.hideLoading();
       Taro.showToast({ 
