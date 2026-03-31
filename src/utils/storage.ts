@@ -119,6 +119,52 @@ export const saveUserProfile = async (profile: any) => {
 };
 
 /**
+ * 更新用户的日记计数
+ * @param {string} openid - 用户的 openid
+ * @param {number} delta - 变化数量（+1 或 -1）
+ */
+export const updateUserEntryCount = async (openid: string, delta: number) => {
+  try {
+    const db = Taro.cloud.database();
+    
+    // 查找用户
+    const userRes = await db.collection('users').where({
+      openid: openid
+    }).limit(1).get();
+    
+    if (userRes.data.length > 0) {
+      // 更新现有用户的计数
+      const userId = userRes.data[0]._id;
+      const currentCount = userRes.data[0].entryCount || 0;
+      
+      await db.collection('users').doc(userId).update({
+        data: {
+          entryCount: currentCount + delta,
+          updateTime: db.serverDate()
+        }
+      });
+      
+      console.log(`[updateUserEntryCount] 用户 ${openid} 的日记计数已更新：${currentCount} → ${currentCount + delta}`);
+    } else {
+      // 用户不存在，创建新用户记录（带初始计数）
+      await db.collection('users').add({
+        data: {
+          openid: openid,
+          entryCount: delta > 0 ? delta : 0,
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      });
+      
+      console.log(`[updateUserEntryCount] 创建新用户记录，初始计数：${delta > 0 ? delta : 0}`);
+    }
+  } catch (error) {
+    console.error('[updateUserEntryCount] 更新计数失败:', error);
+    // 不抛出错误，避免影响主流程
+  }
+};
+
+/**
  * 检查登录状态是否有效
  * @returns Promise<boolean>
  */
@@ -218,6 +264,7 @@ export const saveEntry = async (entry) => {
   try {
     // 检查是否已存在 (通过 id 或 _id)
     const queryId = entry._id || entry.id;
+    let isNewEntry = false;
     
     if (queryId) {
       // 尝试在云端查找
@@ -226,32 +273,36 @@ export const saveEntry = async (entry) => {
       }).get();
       
       if (checkRes.data.length > 0) {
-        // 更新
+        // 更新现有日记
         const { _id, _openid, ...updateData } = entry;
         updateData.updateTime = new Date().getTime();
         
         await collection.doc(queryId).update({
           data: updateData
         });
+        console.log('[saveEntry] 日记已更新');
       } else {
-        // 新增
-        entry.createTime = entry.createTime || new Date().getTime();
-        entry.updateTime = entry.updateTime || new Date().getTime();
-        const addRes = await collection.add({
-          data: entry
-        });
-        entry._id = addRes._id;
-        entry.id = addRes._id; // 保持兼容
+        // 日记不存在，按新增处理
+        isNewEntry = true;
       }
     } else {
       // 新增 (没有 id)
-      entry.createTime = new Date().getTime();
+      isNewEntry = true;
+    }
+    
+    // 如果是新增日记，需要增加用户的日记计数
+    if (isNewEntry) {
+      entry.createTime = entry.createTime || new Date().getTime();
       entry.updateTime = entry.updateTime || new Date().getTime();
       const addRes = await collection.add({
         data: entry
       });
       entry._id = addRes._id;
-      entry.id = addRes._id;
+      entry.id = addRes._id; // 保持兼容
+      
+      // 更新用户的日记计数
+      await updateUserEntryCount(openid, 1);
+      console.log('[saveEntry] 新增日记，用户计数 +1');
     }
     
     // 更新本地缓存
@@ -310,14 +361,31 @@ export const saveEntry = async (entry) => {
 export const deleteEntryById = async (id) => {
   try {
     const db = Taro.cloud.database();
-    await db.collection(DB_COLLECTION).doc(id).remove();
     
-    // 更新本地缓存
-    const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
-    const newEntries = entries.filter(e => e.id !== id && e._id !== id);
-    Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
+    // 先获取要删除的日记，确认其存在
+    const entryRes = await db.collection(DB_COLLECTION).doc(id).get();
     
-    return newEntries;
+    if (entryRes.data) {
+      // 删除日记
+      await db.collection(DB_COLLECTION).doc(id).remove();
+      
+      // 获取当前用户的 openid
+      const openid = getOpenId();
+      if (openid) {
+        // 减少用户的日记计数
+        await updateUserEntryCount(openid, -1);
+        console.log('[deleteEntryById] 删除日记，用户计数 -1');
+      }
+      
+      // 更新本地缓存
+      const entries = Taro.getStorageSync(STORAGE_KEYS.ENTRIES) || [];
+      const newEntries = entries.filter(e => e.id !== id && e._id !== id);
+      Taro.setStorageSync(STORAGE_KEYS.ENTRIES, newEntries);
+      
+      return newEntries;
+    } else {
+      throw new Error('日记不存在');
+    }
   } catch (error) {
     console.error('Failed to delete entry from cloud:', error);
     // 降级：仅从本地删除
