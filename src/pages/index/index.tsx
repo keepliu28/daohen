@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { View, Text, Textarea, ScrollView, Input, Picker, MovableArea, MovableView, Image, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { getEntries, saveEntry, deleteEntryById, getUserProfile, saveUserProfile, uploadAvatar, autoSync } from '../../utils/storage'
+import { getEntries, saveEntry, deleteEntryById, getUserProfile, saveUserProfile, uploadAvatar, autoSync, getUserSubscription, hasPasswordLock, setEntryPassword, verifyEntryPassword, removeEntryPassword } from '../../utils/storage'
 import { debounce, throttle, paginateData, PerformanceMonitor } from '../../utils/performance'
 import LoginModal from '../../components/LoginModal'
 import WechatLogin from '../../components/WechatLogin'
@@ -10,6 +10,7 @@ import ModernLoginModal from '../../components/ModernLoginModal'
 import AppleStyleLogin from '../../components/AppleStyleLogin'
 import VirtualList from '../../components/VirtualList'
 import LazyImage from '../../components/LazyImage'
+import ApplePasscodeModal from '../../components/ApplePasscodeModal'
 import './index.scss'
 
 const MOODS = [
@@ -100,6 +101,11 @@ export default function Index() {
   const [showOfficialLogin, setShowOfficialLogin] = useState(false)
   const [tempAvatarUrl, setTempAvatarUrl] = useState("")
   const [tempNickName, setTempNickName] = useState("")
+  
+  // 密码锁相关状态
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [passwordModalType, setPasswordModalType] = useState<'set' | 'verify'>('set')
+  const [pendingLockAction, setPendingLockAction] = useState<'lock' | 'unlock' | null>(null)
   
   // 性能优化状态
   const [currentPage, setCurrentPage] = useState(1)
@@ -268,23 +274,63 @@ export default function Index() {
     setTempAvatarUrl(avatarUrl)
   }
 
-  // 获取聚合心情数据
+  // 获取聚合心情数据（包含标准心情和自定义心情）
   const getAggregatedMoods = (entries: any[]) => {
     const moodCounts: { [key: string]: number } = {};
+    const moodCustomData: { [key: string]: { icon?: string; label?: string; color?: string } } = {};
     
+    // 统计所有心情（包括自定义）
     entries.forEach(entry => {
       if (entry.mood) {
-        moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+        // 如果是自定义心情，使用实际的标签作为 key
+        const moodKey = entry.mood === 'custom' 
+          ? `custom_${entry.moodLabel || entry.customMood || 'unknown'}` 
+          : entry.mood;
+        
+        moodCounts[moodKey] = (moodCounts[moodKey] || 0) + 1;
+        
+        // 保存自定义心情的元数据
+        if (entry.mood === 'custom' && entry.moodEmoji) {
+          moodCustomData[moodKey] = {
+            icon: entry.moodEmoji,
+            label: entry.moodLabel || entry.customMood,
+            color: entry.moodColor || '#9CA3AF'
+          };
+        }
       }
     });
 
-    return MOODS.map(mood => ({
+    // 构建结果：先标准心情，再自定义心情
+    let result = MOODS.map(mood => ({
       id: mood.id,
       icon: mood.icon,
       label: mood.label,
       color: mood.color,
       count: moodCounts[mood.id] || 0
     })).filter(mood => mood.count > 0);
+    
+    // 添加自定义心情
+    Object.keys(moodCounts).forEach(moodKey => {
+      // 如果不是标准心情，则添加自定义心情
+      if (!MOODS.find(m => m.id === moodKey) && moodKey.startsWith('custom_')) {
+        const customData = moodCustomData[moodKey] || {};
+        // 从 key 中提取实际的心情名称
+        const actualLabel = moodKey.replace('custom_', '');
+        
+        result.push({
+          id: moodKey,
+          icon: '🎨',  // 统一使用调色板图标
+          label: actualLabel,
+          color: customData.color || '#9CA3AF',
+          count: moodCounts[moodKey]
+        });
+      }
+    });
+    
+    // 按数量排序
+    result.sort((a, b) => b.count - a.count);
+    
+    return result;
   };
 
   // 微信登录成功处理
@@ -377,6 +423,36 @@ export default function Index() {
     else setView('home')
   }
 
+  const handleMoodView = async () => {
+    triggerVibrate('light')
+    // 检查 Pro 权限
+    const subscription = await getUserSubscription()
+    if (subscription.isPro) {
+      // Pro 用户，跳转到心情印记页面
+      Taro.navigateTo({
+        url: '/pages/mood-memories/index'
+      })
+    } else {
+      // 非 Pro 用户，显示升级提示
+      Taro.showModal({
+        title: 'Pro 功能',
+        content: '心情印记是 Pro 会员专属功能，升级后可探索情绪背后的真实需求与成长轨迹。',
+        confirmText: '了解 Pro',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/pro/index' })
+          }
+        }
+      })
+    }
+  }
+
+  const handleBottomMoodView = () => {
+    triggerVibrate('light')
+    setView('mood')
+  }
+
   const handleEdit = () => {
     if (selectedEntry.isLocked) {
       Taro.showToast({ title: '请先解锁', icon: 'none' });
@@ -392,12 +468,91 @@ export default function Index() {
   }
 
   const handleToggleLock = async () => {
-    const updatedEntry = { ...selectedEntry, isLocked: !selectedEntry.isLocked };
-    const updatedList = await saveEntry(updatedEntry);
-    setSelectedEntry(updatedEntry);
-    setEntries(updatedList);
     triggerVibrate('light');
-    Taro.showToast({ title: updatedEntry.isLocked ? '已上锁' : '已解锁', icon: 'none' });
+    
+    // 检查用户是否订阅 Pro
+    const subscription = await getUserSubscription();
+    
+    if (!selectedEntry.isLocked) {
+      // 上锁操作
+      if (!subscription.isPro) {
+        // 非 Pro 用户，提示升级
+        Taro.showModal({
+          title: 'Pro 功能',
+          content: '3 位数字密码锁是 Pro 会员专属功能，升级后可保护您的私密记录。',
+          confirmText: '了解 Pro',
+          cancelText: '取消',
+          success: (res) => {
+            if (res.confirm) {
+              Taro.navigateTo({ url: '/pages/pro/index' });
+            }
+          }
+        });
+        return;
+      }
+      
+      // Pro 用户，显示密码设置框
+      setPasswordModalType('set');
+      setPendingLockAction('lock');
+      setShowPasswordModal(true);
+    } else {
+      // 解锁操作
+      const hasLock = hasPasswordLock(selectedEntry.id);
+      if (hasLock) {
+        // 需要验证密码
+        setPasswordModalType('verify');
+        setPendingLockAction('unlock');
+        setShowPasswordModal(true);
+      } else {
+        // 没有密码，直接解锁
+        const updatedEntry = { ...selectedEntry, isLocked: false };
+        const updatedList = await saveEntry(updatedEntry);
+        setSelectedEntry(updatedEntry);
+        setEntries(updatedList);
+        triggerVibrate('light');
+        Taro.showToast({ title: '已解锁', icon: 'success' });
+      }
+    }
+  }
+
+  const handlePasswordConfirm = async (password: string) => {
+    if (!selectedEntry) return;
+    
+    if (passwordModalType === 'set') {
+      // 设置密码
+      const success = await setEntryPassword(selectedEntry.id, password);
+      if (success) {
+        // 设置密码后上锁
+        const updatedEntry = { ...selectedEntry, isLocked: true };
+        const updatedList = await saveEntry(updatedEntry);
+        setSelectedEntry(updatedEntry);
+        setEntries(updatedList);
+        setShowPasswordModal(false);
+        setPendingLockAction(null);
+        triggerVibrate('medium');
+        Taro.showToast({ title: '已上锁', icon: 'success' });
+      } else {
+        Taro.showToast({ title: '设置失败，请重试', icon: 'none' });
+      }
+    } else if (passwordModalType === 'verify') {
+      // 验证密码
+      const verified = await verifyEntryPassword(selectedEntry.id, password);
+      if (verified) {
+        if (pendingLockAction === 'unlock') {
+          // 解锁
+          const updatedEntry = { ...selectedEntry, isLocked: false };
+          const updatedList = await saveEntry(updatedEntry);
+          setSelectedEntry(updatedEntry);
+          setEntries(updatedList);
+          triggerVibrate('light');
+          Taro.showToast({ title: '已解锁', icon: 'success' });
+        }
+        setShowPasswordModal(false);
+        setPendingLockAction(null);
+      } else {
+        Taro.showToast({ title: '密码错误', icon: 'none' });
+      }
+    }
   }
 
   const handleDelete = () => {
@@ -695,7 +850,13 @@ export default function Index() {
                 triggerVibrate('light');
               }
             }}>{userProfile ? <Image src={userProfile.avatarUrl} className='avatar-img' /> : <View className='avatar-placeholder'>👤</View>}</View>
-              <View className='right-icons'><View className='icon-btn' onClick={() => { setView('mood'); triggerVibrate('light'); }}><Text>🔮</Text></View><View className='icon-btn' onClick={() => { setIsSearchMode(true); triggerVibrate('light'); }}><Text>🔍</Text></View></View></>
+              <View className='right-icons'>
+                <View className='icon-btn pro-icon-btn' onClick={() => { Taro.navigateTo({ url: '/pages/pro/index' }); triggerVibrate('light'); }}>
+                  <Text>⭐</Text>
+                </View>
+                <View className='icon-btn' onClick={handleMoodView}><Text>🔮</Text></View>
+                <View className='icon-btn' onClick={() => { setIsSearchMode(true); triggerVibrate('light'); }}><Text>🔍</Text></View>
+              </View></>
           ) : (
             <View className='search-bar-container animate-fade-in'><View className='search-input-wrapper'><Text className='search-icon'>🔍</Text><Input className='search-input-main' placeholder='搜索道痕...' value={searchKeyword} onInput={(e) => setSearchKeyword(e.detail.value)} autoFocus /></View><Text className='search-cancel-btn' onClick={() => { setIsSearchMode(false); setSearchKeyword(''); triggerVibrate('light'); }}>取消</Text></View>
           )}
@@ -1845,7 +2006,7 @@ export default function Index() {
             <View className='nav-icon-btn add-btn' onClick={() => { setView('new'); resetForm(); triggerVibrate('medium'); }}><Text>+</Text></View>
             
             {view === 'home' ? (
-              <View className='nav-icon-btn' onClick={() => { setView('mood'); triggerVibrate('light'); }}><Text>🔮</Text></View>
+              <View className='nav-icon-btn' onClick={handleBottomMoodView}><Text>🔮</Text></View>
             ) : (
               <View className='nav-icon-btn' onClick={() => { setView('home'); triggerVibrate('light'); }}><Text>🏠</Text></View>
             )}
@@ -1960,6 +2121,18 @@ export default function Index() {
         visible={showOfficialLogin}
         onSuccess={handleOfficialLoginSuccess}
         onClose={() => setShowOfficialLogin(false)}
+      />
+
+      {/* 密码锁弹窗 - 苹果风格 */}
+      <ApplePasscodeModal
+        visible={showPasswordModal}
+        onClose={() => {
+          setShowPasswordModal(false);
+          setPendingLockAction(null);
+        }}
+        onConfirm={handlePasswordConfirm}
+        title={passwordModalType === 'set' ? '设置密码' : '输入密码'}
+        isPasswordSet={passwordModalType === 'verify'}
       />
     </View>
   )

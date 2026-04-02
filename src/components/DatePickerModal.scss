@@ -1,0 +1,125 @@
+.date-picker-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.date-picker-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4PX);
+}
+
+.date-picker-content {
+  position: relative;
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 20PX 20PX 0 0;
+  padding-bottom: calc(20PX + env(safe-area-inset-bottom));
+  animation: slide-up 0.3s ease;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.date-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16PX 20PX;
+  border-bottom: 1PX solid #F2F2F7;
+}
+
+.date-picker-title {
+  font-size: 17PX;
+  font-weight: 600;
+  color: #1C1C1E;
+}
+
+.date-picker-cancel {
+  font-size: 17PX;
+  color: #007AFF;
+  padding: 8PX 12PX;
+}
+
+.date-picker-cancel:active {
+  opacity: 0.6;
+}
+
+.date-picker-body {
+  padding: 0;
+}
+
+.date-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16PX 20PX;
+  background: #FFFFFF;
+}
+
+.date-picker-item:active {
+  background: #F2F2F7;
+}
+
+.date-picker-label {
+  font-size: 17PX;
+  color: #1C1C1E;
+}
+
+.date-picker-value {
+  display: flex;
+  align-items: center;
+  gap: 8PX;
+  color: #8E8E93;
+  font-size: 17PX;
+}
+
+.date-picker-arrow {
+  font-size: 20PX;
+  color: #C7C7CC;
+}
+
+.date-picker-divider {
+  height: 1PX;
+  background: #F2F2F7;
+  margin: 0 20PX;
+}
+
+.date-picker-footer {
+  padding: 12PX 20PX;
+  padding-top: 0;
+}
+
+.date-picker-confirm {
+  width: 100%;
+  height: 50PX;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12PX;
+  color: #FFFFFF;
+  font-size: 17PX;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4PX 12PX rgba(102, 126, 234, 0.3);
+}
+
+.date-picker-confirm:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}

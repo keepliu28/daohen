@@ -1,0 +1,222 @@
+page {
+  background-color: #F2F2F7;
+  min-height: 100vh;
+}
+
+.mood-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 16PX;
+  color: #8E8E93;
+}
+
+/* Pro 锁定状态 */
+.mood-pro-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60PX 40PX;
+  height: 100vh;
+  text-align: center;
+}
+
+.lock-icon {
+  font-size: 80PX;
+  margin-bottom: 32PX;
+}
+
+.lock-title {
+  font-size: 22PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 16PX;
+}
+
+.lock-desc {
+  font-size: 15PX;
+  color: #8E8E93;
+  line-height: 1.6;
+  margin-bottom: 40PX;
+}
+
+.upgrade-btn {
+  padding: 16PX 48PX;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 32PX;
+  color: #FFFFFF;
+  font-size: 17PX;
+  font-weight: 600;
+  box-shadow: 0 8PX 24PX rgba(102, 126, 234, 0.3);
+}
+
+.upgrade-btn:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+/* Pro 用户界面 */
+.mood-container {
+  padding: 0 24PX;
+  padding-bottom: calc(80PX + env(safe-area-inset-bottom));
+}
+
+.mood-header {
+  padding: calc(44PX + env(safe-area-inset-top)) 0 32PX;
+  text-align: center;
+}
+
+.mood-title {
+  display: block;
+  font-size: 28PX;
+  font-weight: 700;
+  color: #1C1C1E;
+  margin-bottom: 8PX;
+}
+
+.mood-subtitle {
+  display: block;
+  font-size: 15PX;
+  color: #8E8E93;
+}
+
+/* 时间维度切换 */
+.dimension-selector {
+  display: flex;
+  gap: 8PX;
+  margin-bottom: 20PX;
+  padding: 0 4PX;
+}
+
+.dimension-btn {
+  flex: 1;
+  height: 36PX;
+  background: #FFFFFF;
+  border-radius: 18PX;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2PX 8PX rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.dimension-btn text {
+  font-size: 14PX;
+  font-weight: 500;
+  color: #8E8E93;
+}
+
+.dimension-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4PX 12PX rgba(102, 126, 234, 0.3);
+}
+
+.dimension-btn.active text {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.dimension-btn:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+/* 统计概览 */
+.stats-overview {
+  padding: 16PX 20PX;
+  background: #FFFFFF;
+  border-radius: 12PX;
+  margin-bottom: 24PX;
+  box-shadow: 0 2PX 8PX rgba(0, 0, 0, 0.05);
+}
+
+.overview-text {
+  font-size: 14PX;
+  color: #1C1C1E;
+  font-weight: 500;
+}
+
+/* 心情分布 */
+.mood-section {
+  margin-bottom: 32PX;
+}
+
+.section-title {
+  display: block;
+  font-size: 18PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 20PX;
+}
+
+.mood-bars {
+  background: #FFFFFF;
+  border-radius: 16PX;
+  padding: 20PX;
+  box-shadow: 0 2PX 12PX rgba(0, 0, 0, 0.05);
+}
+
+.mood-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12PX;
+  margin-bottom: 16PX;
+}
+
+.mood-bar-item:last-child {
+  margin-bottom: 0;
+}
+
+.mood-info {
+  display: flex;
+  align-items: center;
+  gap: 8PX;
+  min-width: 80PX;
+}
+
+.mood-icon {
+  font-size: 24PX;
+}
+
+.mood-label {
+  font-size: 14PX;
+  color: #1C1C1E;
+  font-weight: 500;
+}
+
+.mood-bar-container {
+  flex: 1;
+  height: 12PX;
+  background: #F2F2F7;
+  border-radius: 6PX;
+  overflow: hidden;
+}
+
+.mood-bar {
+  height: 100%;
+  border-radius: 6PX;
+  transition: width 0.5s ease;
+}
+
+.mood-percentage {
+  font-size: 13PX;
+  color: #8E8E93;
+  min-width: 45PX;
+  text-align: right;
+}
+
+/* 心情解读 */
+.insight-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16PX;
+  padding: 24PX;
+  box-shadow: 0 8PX 24PX rgba(102, 126, 234, 0.3);
+}
+
+.insight-text {
+  font-size: 15PX;
+  line-height: 1.8;
+  color: #FFFFFF;
+}

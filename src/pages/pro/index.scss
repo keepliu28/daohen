@@ -1,0 +1,266 @@
+page {
+  background-color: #F2F2F7;
+  min-height: 100vh;
+}
+
+.pro-container {
+  padding: 0 24PX;
+  padding-bottom: calc(80PX + env(safe-area-inset-bottom));
+}
+
+.pro-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 16PX;
+  color: #8E8E93;
+}
+
+/* 头部状态 */
+.pro-header {
+  padding: calc(44PX + env(safe-area-inset-top)) 0 24PX;
+  text-align: center;
+}
+
+.pro-status-active,
+.pro-status-free {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12PX;
+}
+
+.pro-badge {
+  padding: 8PX 20PX;
+  border-radius: 20PX;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+  font-size: 16PX;
+  font-weight: 600;
+  box-shadow: 0 4PX 12PX rgba(255, 215, 0, 0.3);
+}
+
+.pro-badge.free {
+  background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+  color: #fff;
+  box-shadow: 0 4PX 12PX rgba(156, 163, 175, 0.3);
+}
+
+.pro-expiry-text,
+.pro-current-usage {
+  font-size: 14PX;
+  color: #8E8E93;
+}
+
+/* 功能列表 */
+.pro-features {
+  margin-top: 32PX;
+}
+
+.features-title {
+  font-size: 20PX;
+  font-weight: 600;
+  margin-bottom: 20PX;
+  color: #1C1C1E;
+}
+
+.features-title .highlight {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.features-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16PX;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16PX;
+  padding: 20PX;
+  background: #FFFFFF;
+  border-radius: 16PX;
+  box-shadow: 0 2PX 8PX rgba(0, 0, 0, 0.05);
+}
+
+.feature-icon {
+  font-size: 32PX;
+  line-height: 1;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-title {
+  display: block;
+  font-size: 16PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 6PX;
+}
+
+.feature-desc {
+  display: block;
+  font-size: 13PX;
+  color: #8E8E93;
+  line-height: 1.5;
+}
+
+/* 价格方案 */
+.pro-pricing {
+  margin-top: 40PX;
+}
+
+.pricing-title {
+  font-size: 18PX;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24PX;
+  color: #1C1C1E;
+}
+
+.pricing-card {
+  padding: 24PX;
+  background: #FFFFFF;
+  border-radius: 20PX;
+  margin-bottom: 16PX;
+  box-shadow: 0 4PX 12PX rgba(0, 0, 0, 0.06);
+  position: relative;
+  border: 2PX solid transparent;
+  transition: all 0.3s ease;
+}
+
+.pricing-card.recommended {
+  border-color: #FFD700;
+  background: linear-gradient(135deg, #FFFBE6 0%, #FFFFFF 100%);
+}
+
+.recommended-badge {
+  position: absolute;
+  top: -12PX;
+  right: 24PX;
+  padding: 6PX 16PX;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+  font-size: 12PX;
+  font-weight: 600;
+  border-radius: 16PX;
+  box-shadow: 0 4PX 8PX rgba(255, 215, 0, 0.3);
+}
+
+.card-header {
+  margin-bottom: 20PX;
+}
+
+.plan-name {
+  display: block;
+  font-size: 18PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 12PX;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4PX;
+}
+
+.plan-price .currency {
+  font-size: 16PX;
+  color: #FF6B00;
+  font-weight: 600;
+}
+
+.plan-price .price {
+  font-size: 42PX;
+  color: #FF6B00;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.plan-price .period {
+  font-size: 14PX;
+  color: #8E8E93;
+  margin-left: 4PX;
+}
+
+.card-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 8PX;
+  margin-bottom: 20PX;
+}
+
+.card-benefits text {
+  font-size: 14PX;
+  color: #666;
+  line-height: 1.6;
+}
+
+.upgrade-btn {
+  width: 100%;
+  height: 48PX;
+  border-radius: 24PX;
+  font-size: 16PX;
+  font-weight: 600;
+  background: linear-gradient(135deg, #FFA500 0%, #FF6B00 100%);
+  color: #FFFFFF;
+  border: none;
+  box-shadow: 0 4PX 12PX rgba(255, 107, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.upgrade-btn.primary {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 4PX 12PX rgba(255, 215, 0, 0.4);
+}
+
+.upgrade-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.upgrade-btn:disabled {
+  background: #9CA3AF;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* 底部说明 */
+.pro-footer {
+  margin-top: 40PX;
+  padding: 24PX 0;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12PX;
+  margin-bottom: 16PX;
+}
+
+.footer-link {
+  font-size: 13PX;
+  color: #007AFF;
+  cursor: pointer;
+}
+
+.footer-divider {
+  font-size: 13PX;
+  color: #C7C7CC;
+}
+
+.footer-disclaimer {
+  font-size: 12PX;
+  color: #8E8E93;
+  line-height: 1.6;
+}

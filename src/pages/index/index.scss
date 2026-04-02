@@ -69,6 +69,11 @@ text, view, input, textarea {
   box-shadow: 0 4PX 12PX var(--stone-shadow);
 }
 
+.pro-icon-btn {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 4PX 12PX rgba(255, 215, 0, 0.3);
+}
+
 .right-icons {
   display: flex;
   gap: 12PX;

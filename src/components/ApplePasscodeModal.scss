@@ -1,0 +1,154 @@
+.apple-passcode-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.apple-passcode-content {
+  width: 100%;
+  background: #FFFFFF;
+  border-radius: 20PX 20PX 0 0;
+  padding: 32PX 24PX calc(40PX + env(safe-area-inset-bottom));
+  animation: slideUp 0.3s ease;
+}
+
+.passcode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40PX;
+  padding-top: env(safe-area-inset-top);
+}
+
+.passcode-title {
+  font-size: 20PX;
+  font-weight: 600;
+  color: #1C1C1E;
+}
+
+.passcode-close {
+  font-size: 28PX;
+  color: #007AFF;
+  width: 44PX;
+  height: 44PX;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 密码指示器 */
+.passcode-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40PX;
+  gap: 12PX;
+}
+
+.indicator-dots {
+  display: flex;
+  gap: 12PX;
+}
+
+.dot {
+  width: 12PX;
+  height: 12PX;
+  border-radius: 50%;
+  border: 1.5PX solid #C7C7CC;
+  transition: all 0.2s ease;
+}
+
+.dot.filled {
+  background: #1C1C1E;
+  border-color: #1C1C1E;
+  transform: scale(1.1);
+}
+
+.passcode-hint {
+  font-size: 14PX;
+  color: #8E8E93;
+}
+
+/* 数字键盘 */
+.passcode-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 16PX;
+}
+
+.keypad-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16PX;
+}
+
+.key {
+  flex: 1;
+  aspect-ratio: 1;
+  max-width: 80PX;
+  margin: 0 auto;
+  background: #F2F2F7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.key:active {
+  background: #D1D1D6;
+  transform: scale(0.95);
+}
+
+.key-number {
+  font-size: 32PX;
+  font-weight: 400;
+  color: #1C1C1E;
+}
+
+.key-placeholder {
+  flex: 1;
+  max-width: 80PX;
+  margin: 0 auto;
+}
+
+.delete-key {
+  background: transparent;
+  position: relative;
+}
+
+.delete-key:active {
+  background: transparent;
+}
+
+.delete-icon {
+  font-size: 28PX;
+  color: #1C1C1E;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

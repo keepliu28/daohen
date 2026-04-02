@@ -290,8 +290,16 @@ export const saveEntry = async (entry) => {
       isNewEntry = true;
     }
     
-    // 如果是新增日记，需要增加用户的日记计数
+    // 如果是新增日记，需要检查配额
     if (isNewEntry) {
+      // 检查容量配额
+      const quotaCheck = await checkQuota();
+      if (!quotaCheck.canProceed) {
+        // 显示升级提示
+        showQuotaUpgradeModal(quotaCheck.quotaType!, quotaCheck.current, quotaCheck.limit);
+        throw new Error(`配额不足：${quotaCheck.quotaType} 已达上限`);
+      }
+      
       entry.createTime = entry.createTime || new Date().getTime();
       entry.updateTime = entry.updateTime || new Date().getTime();
       const addRes = await collection.add({
@@ -633,7 +641,258 @@ export const saveEntryWithRetry = async (entry: any, maxRetries: number = 2) => 
 };
 
 // -----------------------------------------------------------------------------
-// 5. 数据同步策略优化
+// 5. 订阅与容量管理
+// -----------------------------------------------------------------------------
+
+/**
+ * 订阅配额配置
+ */
+export const SUBSCRIPTION_CONFIG = {
+  // 免费版配额
+  FREE: {
+    maxEntriesPerMonth: 30,  // 每月最多 30 条深潜记录
+    passwordLock: false,     // 不支持密码锁
+    cloudBackup: false       // 不保证数据不丢失
+  },
+  // Pro 版配额
+  PRO: {
+    maxEntriesPerMonth: 99999,  // 无限记录
+    passwordLock: true,         // 支持 3 位数字密码锁
+    cloudBackup: true           // 云备份，换设备不丢失
+  }
+};
+
+/**
+ * 获取用户订阅状态
+ */
+export const getUserSubscription = async (): Promise<{
+  isPro: boolean;
+  proExpiry?: number;
+  currentPeriodStart: number;
+  entriesThisMonth: number;
+}> => {
+  const openid = getOpenId();
+  if (!openid) {
+    throw new Error('用户未登录');
+  }
+
+  try {
+    const db = Taro.cloud.database();
+    const userRes = await db.collection('users').where({
+      openid: openid
+    }).limit(1).get();
+
+    if (userRes.data.length === 0) {
+      // 用户不存在，返回免费版
+      return {
+        isPro: false,
+        currentPeriodStart: Date.now(),
+        entriesThisMonth: 0
+      };
+    }
+
+    const userData = userRes.data[0];
+    const isPro = userData.isPro || false;
+    const proExpiry = userData.proExpiry || 0;
+    
+    // 检查 Pro 是否过期
+    const now = Date.now();
+    const effectiveIsPro = isPro && proExpiry > now;
+
+    // 计算本月已用条目数
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const entriesRes = await db.collection('entries').where({
+      openid: openid,
+      createTime: db.command.gte(startOfMonth.getTime())
+    }).count();
+
+    return {
+      isPro: effectiveIsPro,
+      proExpiry: effectiveIsPro ? proExpiry : undefined,
+      currentPeriodStart: startOfMonth.getTime(),
+      entriesThisMonth: entriesRes.count
+    };
+  } catch (error) {
+    console.error('[getUserSubscription] 获取订阅状态失败:', error);
+    // 出错时返回免费版
+    return {
+      isPro: false,
+      currentPeriodStart: Date.now(),
+      entriesThisMonth: 0
+    };
+  }
+};
+
+/**
+ * 检查用户是否有足够的配额
+ */
+export const checkQuota = async (): Promise<{
+  canProceed: boolean;
+  quotaType: 'entries' | null;
+  current: number;
+  limit: number;
+  isPro: boolean;
+}> => {
+  const subscription = await getUserSubscription();
+  const quota = subscription.isPro ? SUBSCRIPTION_CONFIG.PRO : SUBSCRIPTION_CONFIG.FREE;
+
+  // 检查条目配额
+  if (subscription.entriesThisMonth >= quota.maxEntriesPerMonth) {
+    return {
+      canProceed: false,
+      quotaType: 'entries',
+      current: subscription.entriesThisMonth,
+      limit: quota.maxEntriesPerMonth,
+      isPro: subscription.isPro
+    };
+  }
+
+  return {
+    canProceed: true,
+    quotaType: null,
+    current: 0,
+    limit: 0,
+    isPro: subscription.isPro
+  };
+};
+
+/**
+ * 显示配额升级提示
+ */
+export const showQuotaUpgradeModal = (quotaType: 'entries', current: number, limit: number) => {
+  Taro.showModal({
+    title: '本月额度提醒',
+    content: `您本月已完成${current}次深潜，免费额度（${limit}次）已用完。升级 Pro 解锁无限记录，持续探索内心世界。`,
+    confirmText: '了解 Pro',
+    cancelText: '稍后再说',
+    success: (res) => {
+      if (res.confirm) {
+        // 跳转到 Pro 订阅页面
+        Taro.navigateTo({
+          url: '/pages/pro/index'
+        });
+      }
+    }
+  });
+};
+
+/**
+ * 升级用户为 Pro 会员
+ */
+export const upgradeToPro = async (durationMonths: number = 1): Promise<boolean> => {
+  const openid = getOpenId();
+  if (!openid) {
+    throw new Error('用户未登录');
+  }
+
+  try {
+    const db = Taro.cloud.database();
+    const now = Date.now();
+    const expiryTime = now + (durationMonths * 30 * 24 * 60 * 60 * 1000); // 按月计算
+
+    // 查找用户
+    const userRes = await db.collection('users').where({
+      openid: openid
+    }).limit(1).get();
+
+    if (userRes.data.length === 0) {
+      // 用户不存在，创建新用户记录
+      await db.collection('users').add({
+        data: {
+          openid,
+          isPro: true,
+          proExpiry: expiryTime,
+          createTime: db.serverDate(),
+          updateTime: db.serverDate()
+        }
+      });
+    } else {
+      // 更新现有用户
+      const userId = userRes.data[0]._id;
+      await db.collection('users').doc(userId).update({
+        data: {
+          isPro: true,
+          proExpiry: expiryTime,
+          updateTime: db.serverDate()
+        }
+      });
+    }
+
+    console.log(`[upgradeToPro] 用户 ${openid} 已升级为 Pro，过期时间：${new Date(expiryTime).toISOString()}`);
+    return true;
+  } catch (error) {
+    console.error('[upgradeToPro] 升级失败:', error);
+    return false;
+  }
+};
+
+// -----------------------------------------------------------------------------
+// 7. 密码锁管理
+// -----------------------------------------------------------------------------
+
+const PASSWORD_LOCK_KEY = 'password_lock_';
+
+/**
+ * 设置日记密码锁
+ */
+export const setEntryPassword = async (entryId: string, password: string): Promise<boolean> => {
+  try {
+    const key = PASSWORD_LOCK_KEY + entryId;
+    Taro.setStorageSync(key, password);
+    return true;
+  } catch (error) {
+    console.error('[setEntryPassword] 设置密码失败:', error);
+    return false;
+  }
+};
+
+/**
+ * 验证日记密码
+ */
+export const verifyEntryPassword = async (entryId: string, password: string): Promise<boolean> => {
+  try {
+    const key = PASSWORD_LOCK_KEY + entryId;
+    const storedPassword = Taro.getStorageSync(key);
+    return storedPassword === password;
+  } catch (error) {
+    console.error('[verifyEntryPassword] 验证密码失败:', error);
+    return false;
+  }
+};
+
+/**
+ * 检查日记是否有密码锁
+ */
+export const hasPasswordLock = (entryId: string): boolean => {
+  try {
+    const key = PASSWORD_LOCK_KEY + entryId;
+    const password = Taro.getStorageSync(key);
+    return !!password;
+  } catch (error) {
+    console.error('[hasPasswordLock] 检查密码锁失败:', error);
+    return false;
+  }
+};
+
+/**
+ * 移除日记密码锁
+ */
+export const removeEntryPassword = async (entryId: string): Promise<boolean> => {
+  try {
+    const key = PASSWORD_LOCK_KEY + entryId;
+    Taro.removeStorageSync(key);
+    return true;
+  } catch (error) {
+    console.error('[removeEntryPassword] 移除密码失败:', error);
+    return false;
+  }
+};
+
+// -----------------------------------------------------------------------------
+// 6. 数据同步策略优化
 // -----------------------------------------------------------------------------
 
 // 冲突解决策略
