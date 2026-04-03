@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Button, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { getUserSubscription, upgradeToPro, SUBSCRIPTION_CONFIG } from '../../utils/storage'
+import { getUserSubscription, upgradeToPro, SUBSCRIPTION_CONFIG, deleteUserAccount } from '../../utils/storage'
 import './index.scss'
 
 const PRO_FEATURES = [
@@ -68,12 +68,117 @@ export default function ProPage() {
   }
 
   const handleContact = () => {
+    console.log('[handleContact] 点击联系支持')
     Taro.showModal({
       title: '联系开发者',
-      content: '请添加微信：daohen-support 或发送邮件至 support@daohen.com',
+      content: '微信号：kanshan28\n邮箱：kanshan28@foxmail.com',
       showCancel: false,
-      confirmText: '好的'
+      confirmText: '复制',  // 修改为 2 个字符
+      success: (res) => {
+        console.log('[handleContact] showModal success:', res)
+        if (res.confirm) {
+          console.log('[handleContact] 开始复制微信号')
+          Taro.setClipboardData({
+            data: 'kanshan28',
+            success: () => {
+              console.log('[handleContact] 复制成功')
+              Taro.showToast({
+                title: '已复制微信号',
+                icon: 'success'
+              })
+            },
+            fail: (err) => {
+              console.error('[handleContact] 复制失败:', err)
+              Taro.showToast({
+                title: '复制失败',
+                icon: 'none'
+              })
+            }
+          })
+        }
+      },
+      fail: (err) => {
+        console.error('[handleContact] showModal fail:', err)
+      }
     })
+  }
+
+  const handleTerms = () => {
+    Taro.navigateTo({
+      url: '/pages/terms/index'
+    })
+  }
+
+  const handlePrivacy = () => {
+    Taro.navigateTo({
+      url: '/pages/privacy/index'
+    })
+  }
+
+  const handleDeleteAccount = async () => {
+    // 第一次确认
+    const confirm1 = await Taro.showModal({
+      title: '⚠️ 警告：删除账号',
+      content: '此操作将永久删除您的所有数据，包括：\n\n• 所有日记记录\n• 用户资料\n• Pro 会员资格\n\n此操作不可恢复！确定继续吗？',
+      confirmText: '继续',
+      cancelText: '再想想',
+      confirmColor: '#FF3B30'
+    })
+
+    if (!confirm1.confirm) {
+      return
+    }
+
+    // 第二次确认
+    const confirm2 = await Taro.showModal({
+      title: '最终确认',
+      content: '您确定要删除账号吗？\n\n一旦删除，所有数据将永久丢失！',
+      confirmText: '确定删除',
+      cancelText: '取消',
+      confirmColor: '#FF3B30'
+    })
+
+    if (!confirm2.confirm) {
+      return
+    }
+
+    // 执行删除
+    try {
+      Taro.showLoading({ title: '删除中...' })
+      
+      const result = await deleteUserAccount()
+      
+      Taro.hideLoading()
+      
+      if (result.success) {
+        Taro.showModal({
+          title: '账号已注销',
+          content: `已删除 ${result.deletedEntries || 0} 条日记\n${result.deletedUser ? '用户记录已删除' : ''}`,
+          showCancel: false,
+          confirmText: '好的'
+        })
+        
+        // 返回首页
+        setTimeout(() => {
+          Taro.switchTab({
+            url: '/pages/index/index'
+          })
+        }, 1500)
+      } else {
+        Taro.showModal({
+          title: '删除失败',
+          content: result.message,
+          showCancel: false
+        })
+      }
+    } catch (error) {
+      Taro.hideLoading()
+      Taro.showModal({
+        title: '删除失败',
+        content: error.message || '请稍后重试',
+        showCancel: false
+      })
+    }
   }
 
   if (loading) {
@@ -187,13 +292,24 @@ export default function ProPage() {
         <View className='footer-links'>
           <Text className='footer-link' onClick={handleContact}>联系支持</Text>
           <Text className='footer-divider'>|</Text>
-          <Text className='footer-link'>使用条款</Text>
+          <Text className='footer-link' onClick={handleTerms}>使用条款</Text>
           <Text className='footer-divider'>|</Text>
-          <Text className='footer-link'>隐私政策</Text>
+          <Text className='footer-link' onClick={handlePrivacy}>隐私政策</Text>
         </View>
         <Text className='footer-disclaimer'>
           支付完成后立即生效，可随时取消续费
         </Text>
+      </View>
+
+      {/* 危险区域：注销账号 */}
+      <View className='danger-zone'>
+        <View className='danger-zone-title'>危险操作</View>
+        <View className='danger-zone-desc'>
+          <Text>注销账号将删除所有数据，此操作不可恢复</Text>
+        </View>
+        <Button className='delete-account-btn' onClick={handleDeleteAccount}>
+          注销账号
+        </Button>
       </View>
     </View>
   )

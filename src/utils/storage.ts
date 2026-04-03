@@ -892,6 +892,115 @@ export const removeEntryPassword = async (entryId: string): Promise<boolean> => 
 };
 
 // -----------------------------------------------------------------------------
+// 8. 用户注销与数据删除
+// -----------------------------------------------------------------------------
+
+/**
+ * 用户注销 - 删除所有数据（本地 + 云端）
+ * 警告：此操作不可恢复！
+ */
+export const deleteUserAccount = async (): Promise<{
+  success: boolean;
+  message: string;
+  deletedEntries?: number;
+  deletedUser?: boolean;
+}> => {
+  const openid = getOpenId();
+  if (!openid) {
+    return {
+      success: false,
+      message: '用户未登录'
+    };
+  }
+
+  try {
+    const db = Taro.cloud.database();
+
+    // 1. 删除云端所有日记
+    console.log('[deleteUserAccount] 开始删除云端日记...');
+    let deletedEntriesCount = 0;
+    try {
+      // 分批删除日记（每次最多 1000 条）
+      const batchSize = 1000;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const entriesRes = await db.collection('entries')
+          .where({ _openid: openid })
+          .limit(batchSize)
+          .get();
+        
+        if (entriesRes.data.length === 0) {
+          hasMore = false;
+          break;
+        }
+        
+        // 批量删除
+        const deletePromises = entriesRes.data.map(entry => 
+          db.collection('entries').doc(entry._id).remove()
+        );
+        await Promise.all(deletePromises);
+        
+        deletedEntriesCount += entriesRes.data.length;
+        console.log(`[deleteUserAccount] 已删除 ${deletedEntriesCount} 条日记`);
+      }
+      
+      console.log(`[deleteUserAccount] 云端日记删除完成，共删除 ${deletedEntriesCount} 条`);
+    } catch (entriesError) {
+      console.error('[deleteUserAccount] 删除日记失败:', entriesError);
+      // 继续删除用户数据
+    }
+
+    // 2. 删除云端用户记录
+    let deletedUser = false;
+    try {
+      console.log('[deleteUserAccount] 开始删除用户记录...');
+      const userRes = await db.collection('users')
+        .where({ _openid: openid })
+        .get();
+      
+      if (userRes.data.length > 0) {
+        await db.collection('users').doc(userRes.data[0]._id).remove();
+        deletedUser = true;
+        console.log('[deleteUserAccount] 用户记录已删除');
+      }
+    } catch (userError) {
+      console.error('[deleteUserAccount] 删除用户记录失败:', userError);
+    }
+
+    // 3. 清除本地存储
+    console.log('[deleteUserAccount] 清除本地存储...');
+    Taro.removeStorageSync(STORAGE_KEYS.OPENID);
+    Taro.removeStorageSync(STORAGE_KEYS.USER_PROFILE);
+    Taro.removeStorageSync(STORAGE_KEYS.ENTRIES);
+    Taro.removeStorageSync(STORAGE_KEYS.LOGIN_TIMESTAMP);
+    
+    // 清除所有密码锁
+    const keys = Taro.getStorageInfoSync().keys;
+    keys.forEach(key => {
+      if (key.startsWith(PASSWORD_LOCK_KEY)) {
+        Taro.removeStorageSync(key);
+      }
+    });
+    
+    console.log('[deleteUserAccount] 本地存储已清除');
+
+    return {
+      success: true,
+      message: '账号已注销，所有数据已删除',
+      deletedEntries: deletedEntriesCount,
+      deletedUser
+    };
+  } catch (error) {
+    console.error('[deleteUserAccount] 注销失败:', error);
+    return {
+      success: false,
+      message: error.message || '注销失败，请稍后重试'
+    };
+  }
+};
+
+// -----------------------------------------------------------------------------
 // 6. 数据同步策略优化
 // -----------------------------------------------------------------------------
 

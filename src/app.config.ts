@@ -2,7 +2,9 @@ export default defineAppConfig({
   pages: [
     'pages/index/index',
     'pages/pro/index',
-    'pages/mood-memories/index'
+    'pages/mood-memories/index',
+    'pages/terms/index',
+    'pages/privacy/index'
   ],
   window: {
     backgroundTextStyle: 'light',

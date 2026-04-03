@@ -264,3 +264,46 @@ page {
   color: #8E8E93;
   line-height: 1.6;
 }
+
+/* 危险区域：注销账号 */
+.danger-zone {
+  margin-top: 40PX;
+  margin-bottom: calc(40PX + env(safe-area-inset-bottom));
+  padding: 24PX;
+  background: #FFF5F5;
+  border-radius: 12PX;
+  border: 1PX solid #FECACA;
+  text-align: center;
+}
+
+.danger-zone-title {
+  font-size: 16PX;
+  font-weight: 600;
+  color: #DC2626;
+  margin-bottom: 8PX;
+}
+
+.danger-zone-desc {
+  font-size: 13PX;
+  color: #991B1B;
+  margin-bottom: 16PX;
+  line-height: 1.6;
+}
+
+.delete-account-btn {
+  width: 100%;
+  height: 44PX;
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  border-radius: 22PX;
+  color: #FFFFFF;
+  font-size: 15PX;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 4PX 12PX rgba(220, 38, 38, 0.3);
+  transition: all 0.3s ease;
+}
+
+.delete-account-btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}

@@ -1,0 +1,129 @@
+.terms-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F9FAFB 0%, #FFFFFF 100%);
+  padding-bottom: calc(40PX + env(safe-area-inset-bottom));
+}
+
+.terms-header {
+  padding: 40PX 24PX 24PX;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #FFFFFF;
+}
+
+.terms-title {
+  display: block;
+  font-size: 24PX;
+  font-weight: 600;
+  margin-bottom: 8PX;
+}
+
+.terms-subtitle {
+  display: block;
+  font-size: 14PX;
+  opacity: 0.9;
+}
+
+.terms-content {
+  padding: 24PX;
+  max-height: calc(100vh - 180PX);
+}
+
+.terms-section {
+  margin-bottom: 24PX;
+  padding: 20PX;
+  background: #FFFFFF;
+  border-radius: 12PX;
+  box-shadow: 0 2PX 8PX rgba(0, 0, 0, 0.04);
+}
+
+.section-title {
+  display: block;
+  font-size: 16PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 12PX;
+}
+
+.section-content {
+  display: block;
+  font-size: 14PX;
+  color: #6B7280;
+  line-height: 2;
+  white-space: pre-line;  // 使用 pre-line 保留换行符
+}
+
+/* 子章节样式 */
+.subsection {
+  margin: 12PX 0;
+  padding-left: 12PX;
+  border-left: 2PX solid #E5E7EB;
+}
+
+.subsection-title {
+  display: block;
+  font-size: 14PX;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8PX;
+}
+
+/* 列表项样式 */
+.list-item {
+  padding: 6PX 0;
+}
+
+.list-text {
+  display: block;
+  font-size: 14PX;
+  color: #6B7280;
+  line-height: 1.8;
+}
+
+.copy-btn {
+  display: inline-block;
+  padding: 4PX 12PX;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #FFFFFF;
+  border-radius: 12PX;
+  font-size: 12PX;
+  margin-left: 8PX;
+}
+
+.copy-btn:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+.contact-info {
+  padding: 16PX;
+  background: #F9FAFB;
+  border-radius: 8PX;
+  margin-top: 12PX;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8PX 0;
+  font-size: 14PX;
+  color: #6B7280;
+}
+
+.contact-item:first-child {
+  border-bottom: 1PX solid #E5E7EB;
+}
+
+.terms-footer {
+  margin-top: 32PX;
+  padding-top: 24PX;
+  border-top: 1PX solid #F2F2F7;
+  text-align: center;
+}
+
+.update-date {
+  display: block;
+  font-size: 13PX;
+  color: #9CA3AF;
+}
