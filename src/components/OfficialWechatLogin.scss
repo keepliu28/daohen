@@ -1,4 +1,4 @@
-/* 登录容器 - 纯白背景 */
+/* 登录容器 - 柔和背景 */
 .login-container {
   position: fixed;
   top: 0;
@@ -7,7 +7,7 @@
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: #FFFFFF;
+  background: linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%);
   display: flex;
   flex-direction: column;
   z-index: 2000;
@@ -41,12 +41,12 @@
 }
 
 .dh-text {
-  font-size: 24vw;
-  max-font-size: 100px;
-  font-weight: 800;
-  color: #1A1A1A;
+  font-size: 20vw;
+  max-font-size: 88px;
+  font-weight: 700;
+  color: #2A2A2A;
   font-family: -apple-system, 'Helvetica Neue', sans-serif;
-  letter-spacing: -8px;
+  letter-spacing: -6px;
 }
 
 .logo-daohen {
@@ -63,8 +63,8 @@
   display: block;
   font-size: 4vw;
   max-font-size: 16px;
-  color: #999999;
-  font-weight: 300;
+  color: #666666;
+  font-weight: 400;
   letter-spacing: 1px;
 }
 
@@ -286,6 +286,7 @@
 .wechat-icon {
   font-size: 5vw;
   max-font-size: 20px;
+  filter: saturate(1.2);
 }
 
 .wechat-login-btn text {
@@ -319,12 +320,10 @@
 
 /* 响应式断点 */
 @media screen and (min-width: 768px) {
-  .dh-text { font-size: 80px; }
+  .dh-text { font-size: 88px; }
   .logo-daohen { font-size: 20px; }
-  .slogan { font-size: 13px; }
-  .wheel-number { font-size: 30px; }
-  .wechat-login-btn text { font-size: 16px; }
-  .wechat-icon { font-size: 16px; }
-  .agreement-text text { font-size: 10px; }
-  .later-text { font-size: 13px; }
+  .slogan { font-size: 16px; }
+  .wechat-login-btn text { font-size: 18px; }
+  .wechat-icon { font-size: 20px; }
+  .agreement-text text { font-size: 12px; }
 }
