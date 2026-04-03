@@ -335,7 +335,13 @@ export default function Index() {
 
   // 微信登录成功处理
   const handleWechatLoginSuccess = (userInfo: any) => {
-    setUserProfile(userInfo);
+    // 自动使用微信的头像和昵称
+    const profile = {
+      avatarUrl: userInfo.avatarUrl || '',
+      nickName: userInfo.nickName || '',
+      ...userInfo
+    };
+    setUserProfile(profile);
     setShowWechatLogin(false);
     Taro.showToast({ title: '登录成功', icon: 'success' });
   };
@@ -633,7 +639,13 @@ export default function Index() {
               <Text className="avatar-hint">点击选择头像</Text>
               <View className="nickname-wrapper">
                 <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
+                <Input 
+                  className="nickname-input" 
+                  placeholder="请输入昵称" 
+                  value={tempNickName || userProfile?.nickName || ''} 
+                  onInput={(e) => setTempNickName(e.detail.value)}
+                  maxlength={20}
+                />
               </View>
               <View className="save-profile-btn" onClick={handleSaveProfile}>
                 <Text>保存</Text>
@@ -661,7 +673,13 @@ export default function Index() {
               <Text className="avatar-hint">点击选择头像</Text>
               <View className="nickname-wrapper">
                 <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
+                <Input 
+                  className="nickname-input" 
+                  placeholder="请输入昵称" 
+                  value={tempNickName || userProfile?.nickName || ''} 
+                  onInput={(e) => setTempNickName(e.detail.value)}
+                  maxlength={20}
+                />
               </View>
               <View className="save-profile-btn" onClick={handleSaveProfile}>
                 <Text>保存</Text>

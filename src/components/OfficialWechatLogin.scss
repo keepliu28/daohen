@@ -1,5 +1,5 @@
-/* 全屏登录界面 */
-.official-login-fullscreen {
+/* 登录容器 - 纯白背景 */
+.login-container {
   position: fixed;
   top: 0;
   left: 0;
@@ -7,413 +7,324 @@
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(180deg, #F8F9FA 0%, #E9ECEF 100%);
+  background: #FFFFFF;
   display: flex;
   flex-direction: column;
   z-index: 2000;
   overflow: hidden;
 }
 
-/* 背景装饰 */
-.login-background {
+/* 内容区域 - 优化排版 */
+.login-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8vw;
+  padding-top: 15vh;
+  padding-bottom: calc(8vh + env(safe-area-inset-bottom));
+}
+
+/* Logo 区域 - 放大居中 */
+.logo-section {
+  text-align: center;
+  margin-bottom: 8vh;
+  width: 100%;
+}
+
+.logo-dh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3vw;
+}
+
+.dh-text {
+  font-size: 24vw;
+  max-font-size: 100px;
+  font-weight: 800;
+  color: #1A1A1A;
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  letter-spacing: -8px;
+}
+
+.logo-daohen {
+  display: block;
+  font-size: 6vw;
+  max-font-size: 26px;
+  font-weight: 500;
+  color: #1A1A1A;
+  margin-bottom: 3vh;
+  letter-spacing: 1px;
+}
+
+.slogan {
+  display: block;
+  font-size: 4vw;
+  max-font-size: 16px;
+  color: #999999;
+  font-weight: 300;
+  letter-spacing: 1px;
+}
+
+/* 密码锁区域 */
+.lock-section {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  justify-content: center;
+  margin: 6vh 0;
+}
+
+/* 密码锁框架 - 圆润立体 */
+.lock-frame {
+  position: relative;
+  width: 90vw;
+  max-width: 380px;
+  height: 52vw;
+  max-height: 220px;
+  background: linear-gradient(135deg, #E0E0E0 0%, #C0C0C0 50%, #A8A8A8 100%);
+  border-radius: 12px;
+  padding: 3.5vw;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    0 5px 20px rgba(0, 0, 0, 0.2),
+    inset 0 3px 6px rgba(255, 255, 255, 0.6),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.25);
+  border: 1px solid #909090;
+}
+
+/* 螺丝 - 圆润金属质感 */
+.screw {
+  position: absolute;
+  width: 3vw;
+  max-width: 12px;
+  height: 3vw;
+  max-height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #F0F0F0 0%, #C8C8C8 50%, #A0A0A0 100%);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+  border: 0.5px solid #808080;
+}
+
+.screw-tl { top: 2.5vw; left: 2.5vw; }
+.screw-tr { top: 2.5vw; right: 2.5vw; }
+.screw-bl { bottom: 2.5vw; left: 2.5vw; }
+.screw-br { bottom: 2.5vw; right: 2.5vw; }
+
+.screw-head {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 55%;
+  height: 1.5px;
+  background: linear-gradient(90deg, #606060, #909090, #606060);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+/* 密码轮盘容器 - 凹陷圆润 */
+.wheels-container {
+  display: flex;
+  gap: 2vw;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  background: linear-gradient(180deg, #909090 0%, #787878 100%);
+  border-radius: 6px;
+  padding: 1.5vw;
+  box-shadow: 
+    inset 0 5px 10px rgba(0, 0, 0, 0.45),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+/* 单个轮盘 - 圆润立体 */
+.wheel {
+  width: 20vw;
+  max-width: 80px;
+  height: 40vw;
+  max-height: 165px;
+  background: linear-gradient(180deg, 
+    #F5E090 0%, 
+    #F8E598 15%, 
+    #F8D888 50%, 
+    #E8C868 85%, 
+    #D8B858 100%);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3vw 0;
+  box-shadow: 
+    0 5px 15px rgba(0, 0, 0, 0.35),
+    0 3px 8px rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+  border: 1px solid #C8A858;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 轮盘顶部高光 */
+.wheel::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  pointer-events: none;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  border-radius: 4px 4px 0 0;
 }
 
-.bg-circle {
+/* 轮盘底部阴影 */
+.wheel::after {
+  content: '';
   position: absolute;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(7, 193, 96, 0.08) 0%, rgba(5, 168, 80, 0.05) 100%);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.25), transparent);
+  border-radius: 0 0 4px 4px;
 }
 
-.bg-circle-1 {
-  width: 60vw;
-  height: 60vw;
-  max-width: 300px;
-  max-height: 300px;
-  top: -20vw;
-  right: -20vw;
+.wheel-number {
+  font-size: 6.5vw;
+  max-font-size: 26px;
+  font-weight: 500;
+  color: #1A1A1A;
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 
-.bg-circle-2 {
-  width: 40vw;
-  height: 40vw;
-  max-width: 200px;
-  max-height: 200px;
-  bottom: 10%;
-  left: -10vw;
+/* 右侧滑块 - 圆润立体 */
+.lock-slider {
+  position: absolute;
+  right: 2vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5vw;
+  max-width: 10px;
+  height: 14vw;
+  max-height: 58px;
+  background: linear-gradient(180deg, #D8D8D8 0%, #B8B8B8 50%, #A0A0A0 100%);
+  border-radius: 4px;
+  border: 0.5px solid #787878;
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.3),
+    inset 0 2px 3px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.2);
 }
 
-.bg-circle-3 {
-  width: 30vw;
-  height: 30vw;
-  max-width: 150px;
-  max-height: 150px;
-  bottom: 20%;
-  right: 10%;
+.slider-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150%;
+  height: 2.5px;
+  background: linear-gradient(90deg, #808080, #A8A8A8, #808080);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-/* 主内容区域 */
-.official-login-content-full {
-  flex: 1;
+/* 操作区域 - 填充空间 */
+.action-section {
+  width: 100%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
-  padding: 0;
-  position: relative;
-  z-index: 1;
-}
-
-/* 顶部区域 */
-.login-header-full {
-  padding: 12vh 8vw 8vh;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.brand-logo-container {
+  align-items: center;
   margin-bottom: 4vh;
 }
 
-.brand-logo {
-  width: 20vw;
-  height: 20vw;
-  max-width: 80px;
-  max-height: 80px;
-  min-width: 60px;
-  min-height: 60px;
-  margin: 0 auto;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(7, 193, 96, 0.3);
-}
-
-.brand-logo-text {
-  font-size: 9vw;
-  font-weight: 700;
-  color: #FFFFFF;
-  font-family: 'PingFang SC', sans-serif;
-}
-
-.login-main-title {
-  display: block;
-  font-size: 7vw;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin-bottom: 2vh;
-  line-height: 1.3;
-}
-
-.login-main-subtitle {
-  display: block;
-  font-size: 4vw;
-  color: #666666;
-  font-weight: 400;
-  line-height: 1.5;
-}
-
-/* 登录操作区域 */
-.login-action-full {
-  padding: 0 8vw;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.wechat-login-btn-full {
+/* 微信登录按钮 - 圆润立体 */
+.wechat-login-btn {
   width: 100%;
   height: 12vw;
-  min-height: 48px;
+  min-height: 52px;
   max-height: 56px;
-  background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
-  color: #FFFFFF;
+  background: #1A1A1A;
+  border-radius: 28px;
   border: none;
-  border-radius: 3vw;
-  font-size: 4.5vw;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(7, 193, 96, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
   
   &:active {
     transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(7, 193, 96, 0.2);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.2),
+      0 1px 4px rgba(0, 0, 0, 0.1);
   }
   
   &:disabled {
-    background: linear-gradient(135deg, #CCCCCC 0%, #B8B8B8 100%);
-    box-shadow: none;
+    opacity: 0.6;
     cursor: not-allowed;
   }
 }
 
-.btn-content-full {
+.btn-content {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3vw;
-}
-
-.btn-icon-full {
-  font-size: 5.5vw;
-}
-
-.login-tip-full {
-  display: block;
-  margin-top: 4vh;
-  font-size: 3.5vw;
-  color: #999999;
-  text-align: center;
-  line-height: 1.5;
-}
-
-/* 底部区域 */
-.login-footer-full {
-  padding: 6vh 8vw;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.footer-text-full {
-  font-size: 3vw;
-  color: #CCCCCC;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-}
-
-/* 表单区域（全屏） */
-.profile-form-full {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0 8vw 8vh;
-  overflow-y: auto;
-}
-
-/* 头像选择区域 - 圆形设计 */
-.avatar-section-full {
-  margin-bottom: 8vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.section-label-full {
-  display: block;
-  font-size: 4vw;
-  font-weight: 600;
-  color: #333333;
-  margin-bottom: 5vh;
-  text-align: center;
-}
-
-.avatar-btn-circle {
-  width: 35vw;
-  height: 35vw;
-  max-width: 140px;
-  max-height: 140px;
-  min-width: 100px;
-  min-height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(241, 245, 249, 0.8) 0%, rgba(248, 250, 252, 0.6) 100%);
-  border: 3px dashed rgba(7, 193, 96, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  
-  &:active {
-    transform: scale(0.95);
-    border-color: rgba(7, 193, 96, 0.6);
-    background: rgba(235, 248, 255, 0.9);
-  }
-}
-
-.avatar-image-circle {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-.avatar-circle-placeholder {
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2vw;
 }
 
-.avatar-circle-icon {
-  font-size: 8vw;
-  opacity: 0.6;
-}
-
-.avatar-circle-text {
-  font-size: 3vw;
-  color: #999999;
-  font-weight: 500;
-}
-
-/* 昵称输入区域 */
-.nickname-section-full {
-  margin-bottom: 8vh;
-}
-
-.input-wrapper-full {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 0 4vw;
-  border-radius: 3vw;
-  background: #FFFFFF;
-  border: 2px solid #F0F0F0;
-  transition: all 0.3s ease;
-  height: 14vw;
-  min-height: 48px;
-  max-height: 56px;
-  
-  &:focus-within {
-    border-color: #07C160;
-    background: #FFFFFF;
-    box-shadow: 0 0 0 4px rgba(7, 193, 96, 0.1);
-  }
-}
-
-.input-icon-full {
+.wechat-icon {
   font-size: 5vw;
-  padding-right: 3vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 14vw;
-  opacity: 0.6;
+  max-font-size: 20px;
 }
 
-.nickname-input-full {
-  flex: 1;
-  height: 14vw;
-  line-height: 14vw;
-  font-size: 4vw;
-  color: #333333;
-  background: transparent;
-  border: none;
-  padding: 0;
-}
-
-.input-placeholder-full {
-  color: #CCCCCC;
-}
-
-/* 操作按钮区域 */
-.action-section-full {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.save-btn-full {
-  width: 100%;
-  height: 12vw;
-  min-height: 48px;
-  max-height: 56px;
-  border-radius: 3vw;
-  background: linear-gradient(135deg, #07C160 0%, #05A850 100%);
+.wechat-login-btn text {
+  font-size: 4.5vw;
+  max-font-size: 18px;
+  font-weight: 500;
   color: #FFFFFF;
-  font-size: 4.5vw;
-  font-weight: 600;
-  border: none;
+}
+
+/* 协议文字 */
+.agreement-text {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4vh;
+  gap: 1vw;
+}
+
+.agreement-text text {
+  font-size: 2.8vw;
+  max-font-size: 12px;
+  color: #999999;
+  line-height: 1.5;
+}
+
+.link {
+  color: #07C160 !important;
+  text-decoration: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(7, 193, 96, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &:active {
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(7, 193, 96, 0.2);
-  }
-  
-  &:disabled {
-    background: linear-gradient(135deg, #CCCCCC 0%, #B8B8B8 100%);
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-}
-
-.btn-loading-full {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2vw;
-}
-
-.loading-spinner-full {
-  font-size: 4.5vw;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* 响应式断点 */
 @media screen and (min-width: 768px) {
-  .brand-logo-text { font-size: 36px; }
-  .login-main-title { font-size: 28px; }
-  .login-main-subtitle { font-size: 15px; }
-  .wechat-login-btn-full { font-size: 18px; }
-  .btn-icon-full { font-size: 22px; }
-  .login-tip-full { font-size: 13px; }
-  .footer-text-full { font-size: 12px; }
-  .section-label-full { font-size: 16px; }
-  .avatar-circle-icon { font-size: 32px; }
-  .avatar-circle-text { font-size: 12px; }
-  .input-icon-full { font-size: 20px; }
-  .nickname-input-full { font-size: 16px; }
-  .save-btn-full { font-size: 18px; }
-  .loading-spinner-full { font-size: 18px; }
-}
-
-@keyframes fadeIn {
-  from { 
-    opacity: 0;
-  }
-  to { 
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(20px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
+  .dh-text { font-size: 80px; }
+  .logo-daohen { font-size: 20px; }
+  .slogan { font-size: 13px; }
+  .wheel-number { font-size: 30px; }
+  .wechat-login-btn text { font-size: 16px; }
+  .wechat-icon { font-size: 16px; }
+  .agreement-text text { font-size: 10px; }
+  .later-text { font-size: 13px; }
 }
