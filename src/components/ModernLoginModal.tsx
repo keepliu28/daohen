@@ -34,29 +34,51 @@ const ModernLoginModal: React.FC<ModernLoginModalProps> = ({
   };
 
   const handleSaveProfile = async () => {
-    if (!tempAvatarUrl || !tempNickName) {
-      Taro.showToast({ title: '请完善头像和昵称', icon: 'none' });
+    console.log('[handleSaveProfile] 当前头像:', tempAvatarUrl);
+    console.log('[handleSaveProfile] 当前昵称:', tempNickName, '(长度:', tempNickName?.length, ')');
+    
+    if (!tempAvatarUrl && !userProfile?.avatarUrl) {
+      Taro.showToast({ title: '请选择头像', icon: 'none' });
       return;
     }
+    
+    const hasNickName = tempNickName && tempNickName.trim().length > 0;
+    const hasExistingNickName = userProfile?.nickName && userProfile.nickName.trim().length > 0;
+    
+    if (!hasNickName && !hasExistingNickName) {
+      Taro.showModal({
+        title: '提示',
+        content: '您还没有设置昵称，将使用默认昵称"道痕行者"，您可以在稍后修改。',
+        showCancel: false,
+        confirmText: '好的'
+      });
+    }
+    
+    const finalNickName = (hasNickName ? tempNickName.trim() : (userProfile?.nickName || '道痕行者'));
+    const finalAvatarUrl = tempAvatarUrl || userProfile?.avatarUrl || '';
+    
+    console.log('[handleSaveProfile] 最终头像:', finalAvatarUrl);
+    console.log('[handleSaveProfile] 最终昵称:', finalNickName);
     
     setIsSaving(true);
     Taro.showLoading({ title: '保存中...' });
     
     try {
-      let finalAvatarUrl = tempAvatarUrl;
+      let uploadAvatarUrl = finalAvatarUrl;
       
-      // 如果是临时文件，上传到云存储
-      if (tempAvatarUrl.startsWith('http://tmp/') || tempAvatarUrl.startsWith('wxfile://')) {
-        const fileID = await uploadAvatar(tempAvatarUrl);
+      if (finalAvatarUrl.startsWith('http://tmp/') || finalAvatarUrl.startsWith('wxfile://')) {
+        const fileID = await uploadAvatar(finalAvatarUrl);
         if (fileID) {
-          finalAvatarUrl = fileID;
+          uploadAvatarUrl = fileID;
         }
       }
       
       const profile = { 
-        avatarUrl: finalAvatarUrl, 
-        nickName: tempNickName 
+        avatarUrl: uploadAvatarUrl, 
+        nickName: finalNickName 
       };
+      
+      console.log('[handleSaveProfile] 准备保存的资料:', profile);
       
       const success = await saveUserProfile(profile);
       
@@ -65,6 +87,7 @@ const ModernLoginModal: React.FC<ModernLoginModalProps> = ({
       if (success) {
         Taro.showToast({ title: '保存成功', icon: 'success' });
         onProfileUpdate(profile);
+        setTimeout(() => onClose(), 500);
       } else {
         Taro.showToast({ title: '保存失败，请重试', icon: 'none' });
       }
@@ -72,7 +95,6 @@ const ModernLoginModal: React.FC<ModernLoginModalProps> = ({
       Taro.hideLoading();
       console.error('保存用户资料失败:', error);
       
-      // 明确提示权限错误
       if (error.message?.includes('权限')) {
         Taro.showModal({
           title: '权限错误',
@@ -92,85 +114,122 @@ const ModernLoginModal: React.FC<ModernLoginModalProps> = ({
   return (
     <View className='modern-login-mask' onClick={onClose}>
       <View className='modern-login-content' onClick={e => e.stopPropagation()}>
-        {/* 顶部装饰背景 */}
-        <View className='login-header-bg'>
-          <View className='decoration-circle circle-1'></View>
-          <View className='decoration-circle circle-2'></View>
-          <View className='decoration-circle circle-3'></View>
+        {/* 顶部渐变背景 */}
+        <View className='login-header-gradient'>
+          <View className='glow-circle glow-1'></View>
+          <View className='glow-circle glow-2'></View>
         </View>
 
-        {/* 标题区域 */}
-        <View className='login-title-section'>
-          <View className='app-icon-wrapper'>
-            <View className='app-icon-bg'>
-              <Text className='app-icon-text'>道</Text>
+        {/* 关闭按钮 */}
+        <View className='close-btn' onClick={onClose}>
+          <Text className='close-icon'>✕</Text>
+        </View>
+
+        {/* 内容区域 */}
+        <View className='login-body'>
+          {/* Logo 和标题 */}
+          <View className='brand-section'>
+            <View className='logo-wrapper'>
+              <View className='logo-icon'>
+                <Text className='logo-text'>道</Text>
+              </View>
             </View>
+            <Text className='main-title'>欢迎使用道痕</Text>
+            <Text className='sub-title'>记录思想的光芒</Text>
           </View>
-          <Text className='login-main-title'>欢迎使用道痕</Text>
-          <Text className='login-sub-title'>记录成长的每一步</Text>
-        </View>
 
-        {/* 表单区域 */}
-        <View className='login-form-section'>
           {/* 头像选择 */}
           <View className='avatar-section'>
-            <Text className='field-label'>选择头像</Text>
-            <Button 
-              className='avatar-upload-btn' 
-              openType='chooseAvatar' 
-              onChooseAvatar={handleChooseAvatar}
-            >
-              {tempAvatarUrl ? (
-                <Image className='avatar-preview' src={tempAvatarUrl} mode='aspectFill' />
-              ) : (
-                <View className='avatar-placeholder'>
-                  <Text className='avatar-placeholder-icon'>📷</Text>
-                  <Text className='avatar-placeholder-text'>点击选择</Text>
-                </View>
-              )}
-            </Button>
+            <Text className='section-label'>头像</Text>
+            <View className='avatar-container'>
+              <Button 
+                className='avatar-btn' 
+                openType='chooseAvatar' 
+                onChooseAvatar={handleChooseAvatar}
+              >
+                {tempAvatarUrl ? (
+                  <Image className='avatar-image' src={tempAvatarUrl} mode='aspectFill' />
+                ) : (
+                  <View className='avatar-placeholder'>
+                    <Text className='camera-icon'>📷</Text>
+                    <Text className='placeholder-text'>点击选择头像</Text>
+                  </View>
+                )}
+              </Button>
+            </View>
           </View>
 
           {/* 昵称输入 */}
           <View className='nickname-section'>
-            <Text className='field-label'>设置昵称</Text>
-            <View className='nickname-input-wrapper'>
-              <Text className='input-icon'>👤</Text>
-              <Input
-                className='nickname-input'
-                type='nickname'
-                placeholder='请输入您的昵称'
-                placeholderClass='input-placeholder'
-                value={tempNickName}
-                onInput={(e) => setTempNickName(e.detail.value)}
-                maxlength={20}
-              />
+            <View className='nickname-label-row'>
+              <Text className='section-label'>昵称</Text>
+              {tempNickName && tempNickName.length > 0 && (
+                <View 
+                  className='clear-btn'
+                  onClick={() => setTempNickName('')}
+                >
+                  <Text className='clear-text'>清空</Text>
+                  <Text className='clear-icon'>✕</Text>
+                </View>
+              )}
             </View>
+            <View className='input-container'>
+              <View className='input-wrapper'>
+                <Text className='input-prefix'>👤</Text>
+                <Input
+                  className='nickname-input'
+                  type='text'
+                  placeholder='给自己起个温暖的名字'
+                  placeholderClass='input-placeholder'
+                  value={tempNickName || ''}
+                  onInput={(e) => {
+                    const value = e.detail.value || '';
+                    setTempNickName(value);
+                  }}
+                  onBlur={(e) => {
+                    const value = e.detail.value || '';
+                    setTempNickName(value);
+                  }}
+                  maxlength={20}
+                  confirmType='done'
+                  cursor={-1}
+                />
+                {tempNickName && tempNickName.length > 0 && (
+                  <View 
+                    className='delete-btn'
+                    onClick={() => setTempNickName(tempNickName.slice(0, -1))}
+                  >
+                    <Text className='delete-icon'>⌫</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+            <Text className='input-tip'>支持中文、英文、数字，最多 20 个字符</Text>
           </View>
 
           {/* 保存按钮 */}
-          <View className='save-btn-section'>
+          <View className='action-section'>
             <Button 
-              className='save-profile-btn' 
+              className='save-btn' 
               onClick={handleSaveProfile}
               disabled={isSaving}
             >
               {isSaving ? (
-                <View className='btn-loading'>
-                  <Text className='loading-spinner'>⌛</Text>
+                <View className='loading-state'>
+                  <Text className='spinner'>⟳</Text>
                   <Text>保存中...</Text>
                 </View>
               ) : (
                 <Text>开始使用道痕</Text>
               )}
             </Button>
-            <Text className='login-tip'>完善资料后即可使用所有功能</Text>
+            <Text className='helper-text'>完善资料后即可使用所有功能</Text>
           </View>
         </View>
 
         {/* 底部装饰 */}
         <View className='login-footer'>
-          <View className='footer-line'></View>
+          <View className='footer-divider'></View>
           <Text className='footer-text'>道痕 · 记录思想的光芒</Text>
         </View>
       </View>

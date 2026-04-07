@@ -43,8 +43,9 @@ export const getUserProfile = () => {
 
 /**
  * 保存用户资料到本地和云端
+ * @returns {Promise<boolean>} 保存是否成功
  */
-export const saveUserProfile = async (profile: any) => {
+export const saveUserProfile = async (profile: any): Promise<boolean> => {
   try {
     // 1. 保存到本地存储
     Taro.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
@@ -57,14 +58,14 @@ export const saveUserProfile = async (profile: any) => {
     
     if (!openid) {
       console.error('[saveUserProfile] 未找到 openid，无法保存到云端');
-      return;
+      return false;
     }
     
     try {
-      // 检查用户是否已存在（使用 openid 字段查询）
+      // 检查用户是否已存在（使用 _openid 字段查询，这是云开发自动添加的）
       console.log('[saveUserProfile] 查询用户是否存在...');
       const existingUser = await db.collection('users').where({
-        openid: openid
+        _openid: openid
       }).limit(1).get();
       
       console.log('[saveUserProfile] 查询结果:', existingUser.data.length, '条记录');
@@ -92,6 +93,9 @@ export const saveUserProfile = async (profile: any) => {
         });
         console.log('用户信息已新增到云端，_id:', addResult._id);
       }
+      
+      // 保存成功，返回 true
+      return true;
     } catch (dbError) {
       console.error('[saveUserProfile] 数据库操作失败:', dbError);
       console.error('[saveUserProfile] 错误详情:', dbError.errCode, dbError.errMsg);
@@ -114,7 +118,7 @@ export const saveUserProfile = async (profile: any) => {
     console.error('[saveUserProfile] 保存失败:', error);
     // 即使云端保存失败，也要确保本地保存成功
     Taro.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
-    throw error; // 重新抛出错误，让调用方知道失败
+    return false; // 返回 false 表示保存失败
   }
 };
 

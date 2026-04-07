@@ -11,6 +11,7 @@ import AppleStyleLogin from '../../components/AppleStyleLogin'
 import VirtualList from '../../components/VirtualList'
 import LazyImage from '../../components/LazyImage'
 import ApplePasscodeModal from '../../components/ApplePasscodeModal'
+import { solar2lunar } from '../../utils/lunar'
 import './index.scss'
 
 const MOODS = [
@@ -68,9 +69,7 @@ const STEPS = [
   ] }
 ]
 
-const LUNAR_DAYS = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十', '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十', '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十']
-
-const PAGE_LIMIT = 10; // 每页加载10条数据
+const PAGE_LIMIT = 10; // 每页加载 10 条数据
 
 export default function Index() {
   const [view, setView] = useState('home')
@@ -454,9 +453,29 @@ export default function Index() {
     }
   }
 
-  const handleBottomMoodView = () => {
+  const handleBottomMoodView = async () => {
     triggerVibrate('light')
-    setView('mood')
+    // 检查 Pro 权限
+    const subscription = await getUserSubscription()
+    if (subscription.isPro) {
+      // Pro 用户，跳转到心情印记页面
+      Taro.navigateTo({
+        url: '/pages/mood-memories/index'
+      })
+    } else {
+      // 非 Pro 用户，显示升级提示
+      Taro.showModal({
+        title: 'Pro 功能',
+        content: '心情印记是 Pro 会员专属功能，升级后可探索情绪背后的真实需求与成长轨迹。',
+        confirmText: '了解 Pro',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/pro/index' })
+          }
+        }
+      })
+    }
   }
 
   const handleEdit = () => {
@@ -1073,7 +1092,11 @@ export default function Index() {
                    {calendarCells.map((day, i) => day ? (
                      <View key={day} className={`calendar-day ${day === selectedDate.day && viewMonth.month === selectedDate.month ? 'selected' : ''}`} onClick={() => { setSelectedDate({ ...selectedDate, day, month: viewMonth.month, year: viewMonth.year }); triggerVibrate('light'); }}>
                        <Text className='day-num'>{day}</Text>
-                       <Text className='day-lunar'>{LUNAR_DAYS[(day - 1) % 30]}</Text>
+                       {(() => {
+                         const lunar = solar2lunar(viewMonth.year, viewMonth.month, day)
+                         const festival = lunar.dayText === '初一' ? lunar.monthText : lunar.dayText
+                         return <Text className='day-lunar'>{festival}</Text>
+                       })()}
                        {daysWithEntries.has(day) && <View className='entry-dot' />}
       {showLoginModal && (
         <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
