@@ -640,163 +640,16 @@ export default function Index() {
                     <Text className='entry-card-time'>{new Date(entry.createdAt).getMonth() + 1}月{new Date(entry.createdAt).getDate()}日</Text>
 
                   </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input 
-                  className="nickname-input" 
-                  placeholder="请输入昵称" 
-                  value={tempNickName || userProfile?.nickName || ''} 
-                  onInput={(e) => setTempNickName(e.detail.value)}
-                  maxlength={20}
-                />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                 </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input 
-                  className="nickname-input" 
-                  placeholder="请输入昵称" 
-                  value={tempNickName || userProfile?.nickName || ''} 
-                  onInput={(e) => setTempNickName(e.detail.value)}
-                  maxlength={20}
-                />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
               </View>
               <View className='entry-card-body'>
                 <Text className={`entry-card-fact ${entry.isLocked ? 'locked-text' : ''}`}>
                   {entry.isLocked ? '内容已上锁，点击查看' : entry.fact}
                 </Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
               </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-              </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
             </View>
           )
         })}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
       </View>
     )
   }
@@ -816,61 +669,7 @@ export default function Index() {
         <View className='drawer-menu'>
           <View className='menu-item' onClick={() => { setView('home'); setIsDrawerOpen(false); triggerVibrate('light'); }}><Text>🏠 首页</Text></View>
           <View className='menu-item' onClick={() => { setView('calendar'); setIsDrawerOpen(false); triggerVibrate('light'); }}><Text>📅 日历</Text></View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
         </View>
-      )}
-        </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
       </View>
 
       {/* 顶部导航 */}
@@ -897,33 +696,6 @@ export default function Index() {
           ) : (
             <View className='search-bar-container animate-fade-in'><View className='search-input-wrapper'><Text className='search-icon'>🔍</Text><Input className='search-input-main' placeholder='搜索道痕...' value={searchKeyword} onInput={(e) => setSearchKeyword(e.detail.value)} autoFocus /></View><Text className='search-cancel-btn' onClick={() => { setIsSearchMode(false); setSearchKeyword(''); triggerVibrate('light'); }}>取消</Text></View>
           )}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
         </View>
       )}
 
@@ -936,33 +708,6 @@ export default function Index() {
           <View className='view-container animate-fade-in'>
              <View className='giant-date-section'><Text className='giant-day'>{new Date().getDate()}</Text><Text className='sub-date'>{new Date().getMonth() + 1}月 | 今天</Text></View>
              {renderList()}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
           </View>
         )}
 
@@ -990,65 +735,11 @@ export default function Index() {
                       <Text className='mood-sphere-icon' style={{ fontSize: `${pos.size * 0.3}px` }}>{mood.icon}</Text>
                       <Text className='mood-sphere-label' style={{ fontSize: `${Math.max(12, pos.size * 0.12)}px` }}>{mood.label}</Text>
                       <Text className='mood-sphere-count' style={{ fontSize: `${Math.max(10, pos.size * 0.1)}px` }}>{mood.count} 条</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                     </View>
                   </MovableView>
                 )
               })}
             </MovableArea>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
           </View>
         )}
 
@@ -1059,33 +750,6 @@ export default function Index() {
                  <Text onClick={() => setViewMonth({ ...viewMonth, month: viewMonth.month === 1 ? 12 : viewMonth.month - 1, year: viewMonth.month === 1 ? viewMonth.year - 1 : viewMonth.year })}>◀</Text>
                  <Text className='calendar-title' onClick={() => setCalendarMode(calendarMode === 'month' ? 'year' : 'month')}>{calendarMode === 'month' ? `${viewMonth.year}年${viewMonth.month}月` : `${viewMonth.year}年`}</Text>
                  <Text onClick={() => setViewMonth({ ...viewMonth, month: viewMonth.month === 12 ? 1 : viewMonth.month + 1, year: viewMonth.month === 12 ? viewMonth.year + 1 : viewMonth.year })}>▶</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                </View>
                {calendarMode === 'month' ? (
                  <><View className='calendar-week-header'>{['日', '一', '二', '三', '四', '五', '六'].map(day => (<Text key={day} className='week-day'>{day}</Text>))}</View><View className='calendar-grid'>
@@ -1098,62 +762,8 @@ export default function Index() {
                          return <Text className='day-lunar'>{festival}</Text>
                        })()}
                        {daysWithEntries.has(day) && <View className='entry-dot' />}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                      </View>
                    ) : <View key={i} className='calendar-day empty' />)}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                  </View></>
                ) : (
                  <View className='year-grid'>
@@ -1161,120 +771,12 @@ export default function Index() {
                      <View key={m} className={`month-cell ${m === viewMonth.month ? 'current-month' : ''}`} onClick={() => { setViewMonth({ ...viewMonth, month: m }); setCalendarMode('month'); triggerVibrate('medium'); }}>
                        <Text>{m}月</Text>
                        {monthsWithEntries.has(m) && <View className='month-entry-dot' />}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                      </View>
                    ))}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                  </View>
                )}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
              </View>
              {renderList()}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
           </View>
         )}
 
@@ -1290,155 +792,20 @@ export default function Index() {
                       <View key={m.id} className={`mood-item-v2 ${formData.mood === m.id && !isCustomMood ? 'selected' : ''}`} onClick={() => { setFormData({...formData, mood: m.id}); setIsCustomMood(false); triggerVibrate('light'); }}>
                         <View className='mood-icon-bg' style={formData.mood === m.id && !isCustomMood ? { background: m.color, boxShadow: `0 8px 20px ${m.color}40` } : {}}><Text>{m.icon}</Text></View>
                         <Text className='mood-label-v2' style={formData.mood === m.id && !isCustomMood ? { color: m.color } : {}}>{m.label}</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                       </View>
                     ))}
                     <View className={`mood-item-v2 ${isCustomMood ? 'selected' : ''}`} onClick={() => { setIsCustomMood(true); setFormData({...formData, mood: 'custom'}); triggerVibrate('light'); }}>
                       <View className='mood-icon-bg' style={isCustomMood ? { background: '#1C1C1E', boxShadow: '0 8px 20px rgba(0,0,0,0.2)' } : {}}><Text>✨</Text></View>
                       <Text className='mood-label-v2' style={isCustomMood ? { color: '#1C1C1E' } : {}}>自定义</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                     </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                   </View>
                   {isCustomMood && <Input className='custom-mood-input-v2' placeholder='输入此刻的心情...' value={formData.customMood} onInput={(e) => setFormData({...formData, customMood: e.detail.value})} />}
                   <View className='tag-input-wrapper-v2'><Text className='tag-icon-v2'>#</Text><Input className='tag-input-v2' placeholder='添加标签 (可选)' value={formData.tags} onInput={(e) => setFormData({...formData, tags: e.detail.value})} /></View>
                   {historyTags.length > 0 && (
                     <View className='history-tags-container'><Text className='history-label'>常用：</Text><ScrollView scrollX className='history-tags-scroll'>{historyTags.map(tag => (<Text key={tag} className='history-tag-pill' onClick={() => handleTagClick(tag)}>{tag}</Text>))}</ScrollView></View>
                   )}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                 </View>
                 <View className='action-group-v2'><View className='start-btn-v2' onClick={handleStart}><Text>开始深潜</Text></View></View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
               </View>
             ) : (
               <View className='diving-container-v3' style={{ bottom: keyboardHeight > 0 ? keyboardHeight + 'px' : '0px' }}>
@@ -1447,33 +814,6 @@ export default function Index() {
                   {STEPS.map((_, idx) => (
                     <View key={idx} className={`progress-segment ${idx <= currentStep ? 'active' : ''}`} />
                   ))}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                 </View>
                 
                 {/* 沉浸式头部 */}
@@ -1485,33 +825,6 @@ export default function Index() {
                   )}
                   <Text className='w-step-count'>{currentStep + 1} / {STEPS.length}</Text>
                   <Text className='w-btn-done' onClick={handleSaveDraft}>存草稿</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                 </View>
 
                 {/* 核心输入区 */}
@@ -1519,33 +832,6 @@ export default function Index() {
                   <View className='diving-title-row'>
                     <Text className='diving-huge-title'>{STEPS[currentStep].label}</Text>
                     <Text className='diving-subtitle-inline'>（{STEPS[currentStep].placeholder}）</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                   </View>
                   
                   {/* 灵感启发卡片 */}
@@ -1556,63 +842,9 @@ export default function Index() {
                         {STEPS[currentStep].examples.map((ex, i) => (
                           <View key={i} className='inspiration-chip' onClick={() => { setFormData({...formData, [STEPS[currentStep].id]: ex}); triggerVibrate('light'); }}>
                             <Text>{ex}</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                           </View>
                         ))}
                       </ScrollView>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                     </View>
                   )}
 
@@ -1630,151 +862,16 @@ export default function Index() {
                     adjustPosition={false}
                     showConfirmBar={false}
                   />
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                 </View>
 
                 {/* 底部悬浮操作 */}
                 <View className='diving-footer-v3' style={{ paddingBottom: keyboardHeight > 0 ? "12px" : "" }}>
                   <View className={`next-fab-v3 ${formData[STEPS[currentStep].id]?.trim() ? 'active' : ''}`} onClick={handleNext}>
                     <Text>{currentStep === STEPS.length - 1 ? '完成深潜' : '下一步'}</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                   </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
                 </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
               </View>
             )}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
           </View>
         )}
 
@@ -1785,65 +882,11 @@ export default function Index() {
               <View className='detail-card-title'>
                 {selectedEntry.isLocked ? '🔒 ' : ''}
                 {selectedEntry.stone || '无名之石'}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
               </View>
               <View className='detail-card-fact'>{selectedEntry.fact}</View>
               {STEPS.slice(1).map(step => selectedEntry[step.id] && (
                 <View key={step.id} className='detail-step-item'><Text className='d-step-label'>{step.label}</Text><Text>{selectedEntry[step.id]}</Text></View>
               ))}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
             </View>
             
             {/* 详情页操作栏 */}
@@ -1851,151 +894,16 @@ export default function Index() {
               <View className={`action-btn ${selectedEntry.isLocked ? 'disabled' : ''}`} onClick={handleEdit}>
                 <Text className='action-icon'>✏️</Text>
                 <Text className='action-text'>{(!selectedEntry.stone || !selectedEntry.choice) ? '继续深潜' : '编辑'}</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
               </View>
               <View className='action-btn' onClick={handleToggleLock}>
                 <Text className='action-icon'>{selectedEntry.isLocked ? '🔓' : '🔒'}</Text>
                 <Text className='action-text'>{selectedEntry.isLocked ? '解锁' : '上锁'}</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
               </View>
               <View className={`action-btn delete ${selectedEntry.isLocked ? 'disabled' : ''}`} onClick={handleDelete}>
                 <Text className='action-icon'>🗑️</Text>
                 <Text className='action-text'>删除</Text>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
               </View>
             </View>
-          </View>
-        </View>
-      )}
-              </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-            </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
           </View>
         )}
 
@@ -2003,33 +911,6 @@ export default function Index() {
           <View className='view-container animate-fade-in'>
             <View className='detail-header'><Text className='detail-title'>心情记录</Text></View>
             {renderList()}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
           </View>
         )}
       </ScrollView>
@@ -2051,87 +932,6 @@ export default function Index() {
             ) : (
               <View className='nav-icon-btn' onClick={() => { setView('home'); triggerVibrate('light'); }}><Text>🏠</Text></View>
             )}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-          </View>
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
-        </View>
-      )}
-      {showLoginModal && (
-        <View className="login-modal-mask" onClick={() => setShowLoginModal(false)}>
-          <View className="login-modal-content" onClick={e => e.stopPropagation()}>
-            <View className="login-modal-header">
-              <Text className="login-modal-title">完善个人资料</Text>
-              <Text className="login-modal-close" onClick={() => setShowLoginModal(false)}>✕</Text>
-            </View>
-            <View className="login-modal-body">
-              <Button className="avatar-wrapper" openType="chooseAvatar" onChooseAvatar={handleChooseAvatar}>
-                {tempAvatarUrl || userProfile?.avatarUrl ? (
-                  <Image className="avatar-preview" src={tempAvatarUrl || userProfile?.avatarUrl} />
-                ) : (
-                  <View className="avatar-placeholder-large">👤</View>
-                )}
-              </Button>
-              <Text className="avatar-hint">点击选择头像</Text>
-              <View className="nickname-wrapper">
-                <Text className="nickname-label">昵称</Text>
-                <Input type="nickname" className="nickname-input" placeholder="请输入昵称" value={tempNickName || userProfile?.nickName} onInput={(e) => setTempNickName(e.detail.value)} />
-              </View>
-              <View className="save-profile-btn" onClick={handleSaveProfile}>
-                <Text>保存</Text>
-              </View>
-            </View>
           </View>
         </View>
       )}
