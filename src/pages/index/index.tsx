@@ -923,9 +923,9 @@ export default function Index() {
         )}
       </ScrollView>
 
-      {/* 全局底部导航栏 */}
+      {/* 底部导航栏 - 固定在屏幕底部，始终可见 */}
       {!isDiving && (
-        <View className='pill-nav-wrapper animate-slide-up'>
+        <View className='fixed-bottom-nav'>
           <View className='pill-nav'>
             {view === 'home' ? (
               <View className='nav-icon-btn' onClick={() => { setView('calendar'); triggerVibrate('light'); }}><Text>📅</Text></View>

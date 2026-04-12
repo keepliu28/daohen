@@ -38,7 +38,13 @@ text, view, input, textarea {
 .view-container {
   padding: 0 24PX;
   width: 100%;
-  padding-bottom: calc(140PX + env(safe-area-inset-bottom));
+  /* 
+   * 底部间距计算（确保内容不被固定导航栏遮挡）：
+   * - 导航栏高度 + 安全区域 ≈ 80-100px
+   * - 按钮与导航栏间距：~16px
+   * 使用 120px 确保安全
+   */
+  padding-bottom: 120PX;
 }
 
 .view-container.no-padding {
@@ -79,16 +85,16 @@ text, view, input, textarea {
   gap: 12PX;
 }
 
-/* 首页巨型日期 */
+/* 首页巨型日期 - 紧凑版 */
 .giant-date-section {
-  padding: 6vh 0 4vh;
+  padding: 3vh 0 2vh;  /* 减少垂直间距 */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .giant-day {
-  font-size: 120PX;
+  font-size: 100PX;  /* 从 120px 减小 */
   font-weight: 700;
   color: #1C1C1E;
   line-height: 0.9;
@@ -201,15 +207,15 @@ text, view, input, textarea {
   font-size: 17PX;
   font-weight: 700;
   color: #1C1C1E;
-  margin-bottom: 24PX;
+  margin-bottom: 16PX;  /* 从 24px 减小 */
   display: block;
 }
 
 .mood-grid-v2 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20PX;
-  margin-bottom: 32PX;
+  gap: 14PX;  /* 从 20px 减小 */
+  margin-bottom: 20PX;  /* 从 32px 减小 */
 }
 
 .mood-item-v2 {
@@ -220,15 +226,15 @@ text, view, input, textarea {
 }
 
 .mood-icon-bg {
-  width: 60PX;
-  height: 60PX;
-  border-radius: 20PX;
+  width: 54PX;  /* 从 60px 减小 */
+  height: 54PX;  /* 从 60px 减小 */
+  border-radius: 18PX;  /* 从 20px 微调 */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28PX;
+  font-size: 26PX;  /* 从 28px 减小 */
   background: #F2F2F7;
-  margin-bottom: 8PX;
+  margin-bottom: 6PX;  /* 从 8px 减小 */
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -245,19 +251,19 @@ text, view, input, textarea {
 
 .tag-input-wrapper-v2 {
   background: #F2F2F7;
-  border-radius: 20PX;
-  padding: 16PX 20PX;
+  border-radius: 18PX;  /* 从 20px 微调 */
+  padding: 12PX 16PX;  /* 减小内边距 */
   display: flex;
   flex-direction: row;
   align-items: center;
   width: 100%;
-  margin-bottom: 16PX;
+  margin-bottom: 14PX;  /* 从 16px 减小 */
   box-sizing: border-box;
 }
 
 .tag-icon-v2 {
-  font-size: 20PX;
-  margin-right: 12PX;
+  font-size: 18PX;  /* 从 20px 减小 */
+  margin-right: 10PX;  /* 从 12px 减小 */
   color: #8E8E93;
   font-weight: 700;
   flex-shrink: 0;
@@ -265,7 +271,7 @@ text, view, input, textarea {
 
 .tag-input-v2 {
   flex: 1;
-  font-size: 17PX;
+  font-size: 16PX;  /* 从 17px 减小 */
   color: #1C1C1E;
 }
 
@@ -301,18 +307,19 @@ text, view, input, textarea {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16PX;
+  gap: 12PX;  /* 从 16px 减小 */
+  margin-bottom: 0;
 }
 
 .start-btn-v2 {
-  background: #1C1C1E; /* 改为高级黑 */
+  background: #1C1C1E;
   color: white;
-  padding: 20PX;
-  border-radius: 24PX;
+  padding: 16PX;  /* 从 20px 减小 */
+  border-radius: 22PX;  /* 从 24px 微调 */
   text-align: center;
-  font-size: 19PX;
+  font-size: 18PX;  /* 从 19px 减小 */
   font-weight: 700;
-  box-shadow: 0 10PX 30PX rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8PX 24PX rgba(0, 0, 0, 0.12);  /* 减小阴影 */
   transition: transform 0.2s;
 }
 
@@ -400,27 +407,43 @@ text, view, input, textarea {
   font-weight: 500;
 }
 
-/* 底部胶囊导航 */
-.pill-nav-wrapper {
-  position: absolute;
-  bottom: calc(30PX + env(safe-area-inset-bottom));
+/* 底部导航栏 - 固定定位，始终显示在屏幕底部 */
+.fixed-bottom-nav {
+  position: fixed;
+  bottom: 0;
   left: 0;
   right: 0;
+  
   display: flex;
   justify-content: center;
-  z-index: 200;
-  pointer-events: none;
+  align-items: flex-end;
+  
+  padding: 12PX 24PX;
+  padding-bottom: calc(12PX + env(safe-area-inset-bottom) + constant(safe-area-inset-bottom));
+  
+  background: transparent;
+  z-index: 999;
+  pointer-events: none; /* 让点击事件穿透到内容区域（仅导航按钮响应） */
 }
 
 .pill-nav {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20PX) saturate(180%);
+  background: #FFFFFF;
   border-radius: 32PX;
   padding: 8PX 16PX;
-  box-shadow: 0 15PX 50PX rgba(0, 0, 0, 0.1);
-  pointer-events: auto;
+  box-shadow: 
+    0 8PX 32PX rgba(0, 0, 0, 0.1),
+    0 2PX 8PX rgba(0, 0, 0, 0.04);
+  
+  /* 毛玻璃效果 - 仅在支持的设备上生效，降级为纯色 */
+  backdrop-filter: blur(20PX) saturate(180%);
+  -webkit-backdrop-filter: blur(20PX) saturate(180%);
+  
+  /* 确保在安卓上也有边框区分 */
+  border: 0.5PX solid rgba(0, 0, 0, 0.04);
+  
+  pointer-events: auto; /* 恢复导航按钮的点击事件 */
 }
 
 .nav-icon-btn {
@@ -869,6 +892,84 @@ text, view, input, textarea {
   .avatar-placeholder {
     font-size: 20PX;
     color: #9CA3AF;
+  }
+}
+
+/* ========================================
+   响应式适配
+   针对不同屏幕尺寸微调
+   ======================================== */
+
+/* 小屏设备适配（< 400px 宽度）- iPhone SE 等 */
+@media (max-width: 400PX) {
+  .pill-nav {
+    padding: 6PX 12PX;
+  }
+  
+  .nav-icon-btn {
+    width: 38PX;  /* 从 40px 微调 */
+    height: 38PX;
+    font-size: 18PX;
+  }
+  
+  .mood-grid-v2 {
+    gap: 12PX;
+  }
+  
+  .mood-icon-bg {
+    width: 50PX;
+    height: 50PX;
+    font-size: 24PX;
+  }
+
+  /* 小屏设备：内容区底部间距稍减 */
+  .view-container {
+    padding-bottom: 110PX;
+  }
+
+  /* 小屏：导航栏内边距稍紧凑 */
+  .fixed-bottom-nav {
+    padding: 10PX 20PX;
+    padding-bottom: calc(10PX + env(safe-area-inset-bottom));
+  }
+}
+
+/* 中等屏幕和大屏设备 - 保持标准布局 */
+@media (min-width: 401PX) {
+  .view-container {
+    padding-bottom: 120PX;
+  }
+
+  .fixed-bottom-nav {
+    padding: 12PX 24PX;
+    padding-bottom: calc(12PX + env(safe-area-inset-bottom));
+  }
+}
+
+/* 毛玻璃效果降级处理 - 不支持的设备使用纯色 */
+@supports not (-webkit-backdrop-filter: blur(1px)) {
+  .pill-nav {
+    background: #FFFFFF;
+    border: 0.5PX solid rgba(0, 0, 0, 0.06);
+    box-shadow: 
+      0 15PX 50PX rgba(0, 0, 0, 0.12),
+      0 5PX 20PX rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* 深色模式自动适配 */
+@media (prefers-color-scheme: dark) {
+  .pill-nav {
+    background: #1C1C1E;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 15PX 50PX rgba(0, 0, 0, 0.4),
+      0 5PX 20PX rgba(0, 0, 0, 0.2);
+  }
+
+  .start-btn-v2 {
+    background: #FFFFFF;
+    color: #1C1C1E;
   }
 }
 
