@@ -434,15 +434,13 @@ export default function Index() {
 
   const handleMoodView = async () => {
     triggerVibrate('light')
-    // 检查 Pro 权限
+    // 顶部 🔮 按钮：Pro 专属详情页（跳转到情绪石头页面）
     const subscription = await getUserSubscription()
     if (subscription.isPro) {
-      // Pro 用户，跳转到心情印记页面
       Taro.navigateTo({
         url: '/pages/mood-memories/index'
       })
     } else {
-      // 非 Pro 用户，显示升级提示
       Taro.showModal({
         title: 'Pro 功能',
         content: '心情印记是 Pro 会员专属功能，升级后可探索情绪背后的真实需求与成长轨迹。',
@@ -459,27 +457,9 @@ export default function Index() {
 
   const handleBottomMoodView = async () => {
     triggerVibrate('light')
-    // 检查 Pro 权限
-    const subscription = await getUserSubscription()
-    if (subscription.isPro) {
-      // Pro 用户，跳转到心情印记页面
-      Taro.navigateTo({
-        url: '/pages/mood-memories/index'
-      })
-    } else {
-      // 非 Pro 用户，显示升级提示
-      Taro.showModal({
-        title: 'Pro 功能',
-        content: '心情印记是 Pro 会员专属功能，升级后可探索情绪背后的真实需求与成长轨迹。',
-        confirmText: '了解 Pro',
-        cancelText: '取消',
-        success: (res) => {
-          if (res.confirm) {
-            Taro.navigateTo({ url: '/pages/pro/index' })
-          }
-        }
-      })
-    }
+    // 底部 🔮 按钮：3D 心情球体统计（首页内切换）
+    setView('mood')
+    triggerVibrate('medium')
   }
 
   const handleEdit = () => {
