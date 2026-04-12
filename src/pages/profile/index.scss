@@ -1,0 +1,158 @@
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F2F2F7 0%, #E5E5EA 100%);
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+}
+
+/* 用户信息区域 */
+.user-section {
+  display: flex;
+  align-items: center;
+  padding: 60PX 24PX 32PX;
+  background: transparent;
+}
+
+.avatar-wrapper {
+  margin-right: 20PX;
+}
+
+.user-avatar {
+  width: 80PX;
+  height: 80PX;
+  border-radius: 50%;
+  background: #E5E5EA;
+  overflow: hidden;
+}
+
+.user-avatar.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #E5E5EA 0%, #D1D1D6 100%);
+}
+
+.avatar-icon {
+  font-size: 40PX;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8PX;
+}
+
+.user-name {
+  font-size: 22PX;
+  font-weight: 600;
+  color: #1C1C1E;
+}
+
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4PX 12PX;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  border-radius: 12PX;
+  width: fit-content;
+}
+
+.pro-badge Text {
+  font-size: 12PX;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.arrow-icon {
+  font-size: 24PX;
+  color: #C7C7CC;
+  margin-left: 8PX;
+}
+
+/* 功能菜单卡片 */
+.menu-card {
+  margin: 0 24PX;
+  background: #FFFFFF;
+  border-radius: 16PX;
+  padding: 0 20PX;
+  box-shadow: 0 4PX 16PX rgba(0, 0, 0, 0.04);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20PX 0;
+  transition: opacity 0.2s;
+}
+
+.menu-item:active {
+  opacity: 0.6;
+}
+
+.menu-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4PX;
+  flex: 1;
+}
+
+.menu-title {
+  font-size: 17PX;
+  font-weight: 500;
+  color: #1C1C1E;
+}
+
+.menu-desc {
+  font-size: 13PX;
+  color: #8E8E93;
+  margin-top: 2PX;
+}
+
+.danger-text {
+  color: #FF3B30 !important;
+}
+
+/* 关注公众号特殊样式 */
+.qrcode-item {
+  background: linear-gradient(135deg, rgba(7, 193, 96, 0.05) 0%, rgba(6, 173, 86, 0.02) 100%);
+  border-radius: 12PX;
+  margin: 8PX -20PX;  // 抵消父容器的 padding
+  padding: 18PX 20PX !important;
+
+  .menu-title {
+    color: #07C160;
+    font-weight: 600;
+  }
+
+  .menu-desc {
+    color: rgba(7, 193, 96, 0.7);
+    font-size: 12PX;
+  }
+
+  .arrow-icon {
+    color: #07C160;
+  }
+
+  &:active {
+    background: linear-gradient(135deg, rgba(7, 193, 96, 0.1) 0%, rgba(6, 173, 86, 0.05) 100%);
+    opacity: 1;
+  }
+}
+
+.menu-divider {
+  height: 0.5PX;
+  background: #F2F2F7;
+  margin: 0;
+}
+
+/* 版本信息 */
+.version-info {
+  text-align: center;
+  padding: 40PX 0 20PX;
+}
+
+.version-text {
+  font-size: 13PX;
+  color: #AEAEB2;
+}

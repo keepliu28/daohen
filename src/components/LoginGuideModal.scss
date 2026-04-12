@@ -1,0 +1,154 @@
+.login-guide-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.login-guide-content {
+  width: 85%;
+  max-width: 320PX;
+  background: #FFFFFF;
+  border-radius: 20PX;
+  padding: 40PX 32PX 32PX;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: slideUp 0.3s ease;
+}
+
+/* Logo 区域 */
+.guide-logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24PX;
+}
+
+.guide-logo {
+  width: 80PX;
+  height: 80PX;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20PX;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12PX;
+  box-shadow: 0 8PX 24PX rgba(102, 126, 234, 0.3);
+}
+
+.logo-text {
+  font-size: 28PX;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 2PX;
+}
+
+.guide-title {
+  font-size: 22PX;
+  font-weight: 700;
+  color: #1C1C1E;
+}
+
+/* 提示文案 */
+.guide-message {
+  margin-bottom: 32PX;
+}
+
+.guide-text {
+  font-size: 16PX;
+  color: #3A3A3C;
+  text-align: center;
+}
+
+/* 登录按钮 */
+.guide-login-btn {
+  width: 100%;
+  height: 48PX;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  border-radius: 24PX;
+  font-size: 17PX;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 8PX 20PX rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+
+  &::after {
+    border: none;
+  }
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 4PX 12PX rgba(16, 185, 129, 0.2);
+  }
+}
+
+/* 协议勾选 */
+.guide-agreement {
+  display: flex;
+  align-items: center;
+  margin-top: 20PX;
+  gap: 8PX;
+}
+
+.agreement-checkbox {
+  width: 18PX;
+  height: 18PX;
+  border: 1.5PX solid #D1D1D6;
+  border-radius: 4PX;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.agreement-checkbox.checked {
+  background: #10B981;
+  border-color: #10B981;
+}
+
+.check-icon {
+  color: #FFFFFF;
+  font-size: 12PX;
+  font-weight: 700;
+}
+
+.agreement-text {
+  font-size: 12PX;
+  color: #8E8E93;
+  line-height: 1.5;
+}
+
+.agreement-link {
+  color: #10B981;
+  font-weight: 500;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0); 
+  }
+}

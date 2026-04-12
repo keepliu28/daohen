@@ -1,0 +1,245 @@
+.profile-edit-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.profile-edit-content {
+  width: 85%;
+  max-width: 340PX;
+  background: #FFFFFF;
+  border-radius: 24PX;
+  padding: 40PX 32PX calc(32PX + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &::after {
+    border: none;
+  }
+}
+
+/* 头像区域 */
+.avatar-section {
+  margin-bottom: 32PX;
+}
+
+.avatar-picker-btn {
+  position: relative;
+  width: 100PX;
+  height: 100PX;
+  padding: 0;
+  background: transparent;
+  border: none;
+
+  &::after {
+    border: none;
+  }
+}
+
+.preview-avatar {
+  width: 100PX;
+  height: 100PX;
+  border-radius: 50%;
+  background: #F2F2F7;
+}
+
+.placeholder-avatar {
+  width: 100PX;
+  height: 100PX;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E5E5EA 0%, #D1D1D6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-icon {
+  font-size: 48PX;
+}
+
+.edit-badge {
+  position: absolute;
+  bottom: 4PX;
+  right: 4PX;
+  width: 28PX;
+  height: 28PX;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2PX 8PX rgba(102, 126, 234, 0.4);
+}
+
+.edit-icon {
+  font-size: 14PX;
+}
+
+/* 昵称输入区域 */
+.nickname-section {
+  width: 100%;
+  margin-bottom: 24PX;
+}
+
+.section-title {
+  font-size: 20PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  text-align: center;
+  margin-bottom: 20PX;
+  display: block;
+}
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.nickname-input {
+  width: 100%;
+  height: 44PX;
+  font-size: 17PX;
+  color: #1C1C1E;
+  text-align: center;
+  background: transparent;
+  border: none;
+  padding: 0 12PX;
+}
+
+.input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  right: 10%;
+  height: 1.5PX;
+  background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
+}
+
+/* 微信昵称快捷按钮 */
+.wechat-nickname-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6PX;
+  margin-top: 16PX;
+  padding: 8PX 20PX;
+  background: linear-gradient(135deg, #07C160 0%, #06AD56 100%);
+  color: #FFFFFF;
+  border-radius: 20PX;
+  font-size: 13PX;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 4PX 12PX rgba(7, 193, 96, 0.2);
+  transition: all 0.2s ease;
+
+  &::after {
+    border: none;
+  }
+
+  &:active {
+    transform: scale(0.96);
+    box-shadow: 0 2PX 6PX rgba(7, 193, 96, 0.15);
+  }
+}
+
+.wechat-icon {
+  font-size: 14PX;
+}
+
+/* 引导文案 */
+.guide-text-section {
+  margin-bottom: 36PX;
+  text-align: center;
+}
+
+.guide-text {
+  font-size: 14PX;
+  color: #8E8E93;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+/* 按钮区域 */
+.button-section {
+  width: 100%;
+  display: flex;
+  gap: 16PX;
+}
+
+.skip-btn {
+  flex: 1;
+  height: 48PX;
+  background: #F2F2F7;
+  color: #3A3A3C;
+  border-radius: 24PX;
+  font-size: 17PX;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+
+  &::after {
+    border: none;
+  }
+
+  &:active {
+    background: #E5E5EA;
+  }
+}
+
+.save-btn {
+  flex: 1.5;
+  height: 48PX;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  border-radius: 24PX;
+  font-size: 17PX;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 6PX 16PX rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+
+  &::after {
+    border: none;
+  }
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 3PX 8PX rgba(16, 185, 129, 0.2);
+  }
+
+  &.disabled {
+    opacity: 0.6;
+  }
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1); 
+  }
+}

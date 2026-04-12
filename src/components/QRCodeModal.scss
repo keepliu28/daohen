@@ -1,0 +1,220 @@
+.qrcode-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+  animation: qrcodeFadeIn 0.3s ease;
+}
+
+.qrcode-content {
+  width: 90%;
+  max-width: 340PX;
+  background: #FFFFFF;
+  border-radius: 24PX;
+  padding: 32PX 24PX calc(28PX + env(safe-area-inset-bottom));
+  animation: qrcodeSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 标题区域 */
+.qrcode-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24PX;
+}
+
+.qrcode-title {
+  font-size: 20PX;
+  font-weight: 700;
+  color: #1C1C1E;
+}
+
+.qrcode-close {
+  font-size: 28PX;
+  color: #8E8E93;
+  width: 44PX;
+  height: 44PX;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    color: #C7C7CC;
+  }
+}
+
+/* 二维码展示区 */
+.qrcode-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20PX 0;
+}
+
+.qrcode-subtitle {
+  font-size: 17PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 8PX;
+}
+
+.qrcode-desc {
+  font-size: 14PX;
+  color: #8E8E93;
+  margin-bottom: 24PX;
+}
+
+/* 二维码图片容器 */
+.qrcode-image-wrapper {
+  position: relative;
+  width: 260PX;
+  height: 260PX;
+  background: #F2F2F7;
+  border-radius: 16PX;
+  padding: 16PX;
+  box-shadow: 0 8PX 32PX rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F2F2F7;
+  z-index: 1;
+}
+
+.loading-text {
+  font-size: 14PX;
+  color: #8E8E93;
+}
+
+.qrcode-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12PX;
+}
+
+/* Logo 叠加层（中心位置） */
+.qrcode-logo-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60PX;
+  height: 60PX;
+  background: #FFFFFF;
+  border-radius: 12PX;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4PX 12PX rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.logo-text {
+  font-size: 16PX;
+  font-weight: 800;
+  color: #667eea;
+  letter-spacing: 1PX;
+}
+
+/* 操作提示 */
+.qrcode-tip {
+  font-size: 13PX;
+  color: #AEAEB2;
+  margin-top: 16PX;
+  text-align: center;
+}
+
+/* 底部按钮 */
+.qrcode-footer {
+  display: flex;
+  gap: 12PX;
+  margin-top: 24PX;
+  padding-top: 20PX;
+  border-top: 0.5PX solid #F2F2F7;
+}
+
+.save-btn {
+  flex: 1.5;
+  height: 48PX;
+  background: linear-gradient(135deg, #07C160 0%, #06AD56 100%);
+  color: #FFFFFF;
+  border-radius: 24PX;
+  font-size: 16PX;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6PX;
+  border: none;
+  box-shadow: 0 6PX 16PX rgba(7, 193, 96, 0.25);
+
+  &::after {
+    border: none;
+  }
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.btn-icon {
+  font-size: 18PX;
+}
+
+.close-btn {
+  flex: 1;
+  height: 48PX;
+  background: #F2F2F7;
+  color: #3A3A3C;
+  border-radius: 24PX;
+  font-size: 16PX;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+
+  &::after {
+    border: none;
+  }
+
+  &:active {
+    background: #E5E5EA;
+  }
+}
+
+/* 动画 */
+@keyframes qrcodeFadeIn {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+@keyframes qrcodeSlideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1); 
+  }
+}

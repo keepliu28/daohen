@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { View, Text, Textarea, ScrollView, Input, Picker, MovableArea, MovableView, Image, Button } from '@tarojs/components'
 import Taro, { useDidShow } from '@tarojs/taro'
-import { getEntries, saveEntry, deleteEntryById, getUserProfile, saveUserProfile, uploadAvatar, autoSync, getUserSubscription, hasPasswordLock, setEntryPassword, verifyEntryPassword, removeEntryPassword } from '../../utils/storage'
+import { getEntries, saveEntry, deleteEntryById, getUserProfile, getOpenId, saveUserProfile, uploadAvatar, autoSync, getUserSubscription, hasPasswordLock, setEntryPassword, verifyEntryPassword, removeEntryPassword } from '../../utils/storage'
 import { debounce, throttle, paginateData, PerformanceMonitor } from '../../utils/performance'
 import LoginModal from '../../components/LoginModal'
 import WechatLogin from '../../components/WechatLogin'
@@ -95,6 +95,7 @@ export default function Index() {
 
   const [sysInfo, setSysInfo] = useState({ windowWidth: 375, windowHeight: 812 })
   const [userProfile, setUserProfile] = useState<any>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showWechatLogin, setShowWechatLogin] = useState(false)
   const [showOfficialLogin, setShowOfficialLogin] = useState(false)
@@ -175,11 +176,14 @@ export default function Index() {
     });
 
     // 检查用户资料（同步调用）
+    const openid = getOpenId();
     const profile = getUserProfile();
-    if (profile) {
+    if (profile && openid) {
       setUserProfile(profile);
+      setIsLoggedIn(true);
     } else {
       // 如果没有用户资料，显示官方微信登录（统一使用官方组件）
+      setIsLoggedIn(false);
       setShowOfficialLogin(true);
     }
 
@@ -665,10 +669,20 @@ export default function Index() {
       {/* 侧边栏抽屉 */}
       <View className={`drawer-overlay ${isDrawerOpen ? 'show' : ''}`} onClick={() => setIsDrawerOpen(false)} />
       <View className={`drawer-content ${isDrawerOpen ? 'show' : ''}`}>
-        <View className='drawer-profile'><View className='avatar-circle'><Text>🧑</Text></View><Text className='profile-name'>道痕行者</Text></View>
+        <View className='drawer-profile' onClick={() => { Taro.navigateTo({ url: '/pages/profile/index' }); setIsDrawerOpen(false); triggerVibrate('light'); }}>
+          <View className='avatar-circle'>
+            {userProfile?.avatarUrl ? (
+              <Image src={userProfile.avatarUrl} className='drawer-avatar-img' mode='aspectFill' />
+            ) : (
+              <Text>🧑</Text>
+            )}
+          </View>
+          <Text className='profile-name'>{userProfile?.nickName || (isLoggedIn ? '道痕行者' : '未登录')}</Text>
+        </View>
         <View className='drawer-menu'>
           <View className='menu-item' onClick={() => { setView('home'); setIsDrawerOpen(false); triggerVibrate('light'); }}><Text>🏠 首页</Text></View>
           <View className='menu-item' onClick={() => { setView('calendar'); setIsDrawerOpen(false); triggerVibrate('light'); }}><Text>📅 日历</Text></View>
+          <View className='menu-item' onClick={() => { Taro.navigateTo({ url: '/pages/profile/index' }); setIsDrawerOpen(false); triggerVibrate('light'); }}><Text>👤 我的</Text></View>
         </View>
       </View>
 
@@ -677,15 +691,9 @@ export default function Index() {
         <View className='top-header'>
           {!isSearchMode ? (
             <><View className='user-avatar-btn' onClick={() => { 
-              if (userProfile) {
-                setShowLoginModal(true); 
-                triggerVibrate('light'); 
-              } else {
-                // 未登录时使用官方微信登录
-                setShowOfficialLogin(true);
-                triggerVibrate('light');
-              }
-            }}>{userProfile ? <Image src={userProfile.avatarUrl} className='avatar-img' /> : <View className='avatar-placeholder'>👤</View>}</View>
+              Taro.navigateTo({ url: '/pages/profile/index' });
+              triggerVibrate('light'); 
+            }}>{userProfile?.avatarUrl ? <Image src={userProfile.avatarUrl} className='avatar-img' mode='aspectFill' /> : <View className='avatar-placeholder'>👤</View>}</View>
               <View className='right-icons'>
                 <View className='icon-btn pro-icon-btn' onClick={() => { Taro.navigateTo({ url: '/pages/pro/index' }); triggerVibrate('light'); }}>
                   <Text>⭐</Text>
