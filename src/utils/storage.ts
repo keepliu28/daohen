@@ -87,6 +87,7 @@ export const saveUserProfile = async (profile: any): Promise<boolean> => {
           data: {
             ...profile,
             openid: openid,
+            isPro: false,  // 默认用户为免费版
             createTime: db.serverDate(),
             updateTime: db.serverDate()
           }

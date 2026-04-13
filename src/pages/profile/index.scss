@@ -113,6 +113,33 @@
   color: #FF3B30 !important;
 }
 
+/* 用户反馈特殊样式 */
+.feedback-item {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.03) 100%);
+  border-radius: 12PX;
+  margin: 8PX -20PX;  // 抵消父容器的 padding
+  padding: 18PX 20PX !important;
+
+  .menu-title {
+    color: #667eea;
+    font-weight: 600;
+  }
+
+  .menu-desc {
+    color: rgba(102, 126, 234, 0.7);
+    font-size: 12PX;
+  }
+
+  .arrow-icon {
+    color: #667eea;
+  }
+
+  &:active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.06) 100%);
+    opacity: 1;
+  }
+}
+
 /* 关注公众号特殊样式 */
 .qrcode-item {
   background: linear-gradient(135deg, rgba(7, 193, 96, 0.05) 0%, rgba(6, 173, 86, 0.02) 100%);

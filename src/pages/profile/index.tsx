@@ -5,6 +5,7 @@ import { getUserProfile, getOpenId, deleteUserAccount, getUserSubscription } fro
 import LoginGuideModal from '../../components/LoginGuideModal'
 import ProfileEditModal from '../../components/ProfileEditModal'
 import QRCodeModal from '../../components/QRCodeModal'
+import FeedbackModal from '../../components/FeedbackModal'
 import './index.scss'
 
 export default function ProfilePage() {
@@ -15,6 +16,7 @@ export default function ProfilePage() {
   const [subscription, setSubscription] = useState<any>(null)
   const [version, setVersion] = useState('1.0.0')
   const [showQRCode, setShowQRCode] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
 
   useEffect(() => {
     checkLoginStatus()
@@ -117,6 +119,9 @@ export default function ProfilePage() {
         break
       case 'pro':
         Taro.navigateTo({ url: '/pages/pro/index' })
+        break
+      case 'feedback':
+        setShowFeedback(true)
         break
       case 'qrcode':
         setShowQRCode(true)
@@ -245,6 +250,16 @@ export default function ProfilePage() {
         </View>
         <View className='menu-divider' />
 
+        {/* 用户反馈 */}
+        <View className='menu-item feedback-item' onClick={() => handleMenuClick('feedback')}>
+          <View className='menu-left'>
+            <Text className='menu-title'>用户反馈</Text>
+            <Text className='menu-desc'>帮助我们改进产品体验</Text>
+          </View>
+          <Text className='arrow-icon'>›</Text>
+        </View>
+        <View className='menu-divider' />
+
         {/* 关注公众号 */}
         <View className='menu-item qrcode-item' onClick={() => handleMenuClick('qrcode')}>
           <View className='menu-left'>
@@ -290,6 +305,15 @@ export default function ProfilePage() {
       <QRCodeModal
         visible={showQRCode}
         onClose={() => setShowQRCode(false)}
+      />
+
+      {/* 用户反馈弹窗 */}
+      <FeedbackModal
+        visible={showFeedback}
+        onClose={() => setShowFeedback(false)}
+        onSuccess={() => {
+          console.log('[Profile] 用户已提交反馈')
+        }}
       />
     </View>
   )
