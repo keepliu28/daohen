@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { View, Text, Button, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
 import { getUserSubscription, deleteUserAccount } from '../../utils/storage'
-import { requestPayment, PAYMENT_PRICES, formatPrice } from '../../utils/payment'
+import { requestPayment, PAYMENT_PRICES, formatPrice, isTestPlan } from '../../utils/payment'
 import './index.scss'
 
 const PRO_FEATURES = [
@@ -16,6 +16,18 @@ export default function ProPage() {
   const [subscription, setSubscription] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [upgrading, setUpgrading] = useState(false)
+
+  // 判断是否为开发/体验环境（显示测试选项）
+  const isDevEnvironment = (() => {
+    try {
+      const accountInfo = Taro.getAccountInfoSync()
+      // 开发版、体验版、预览版都显示测试选项
+      return accountInfo.miniProgram.envVersion !== 'release'
+    } catch (e) {
+      console.warn('[ProPage] 获取环境信息失败，默认显示测试选项')
+      return true
+    }
+  })()
 
   useEffect(() => {
     loadSubscription()
@@ -261,6 +273,34 @@ export default function ProPage() {
       {!isPro && (
         <View className='pro-pricing'>
           <View className='pricing-title'>选择适合您的方案</View>
+
+          {/* 🧪 测试选项（仅开发/体验版显示） */}
+          {isDevEnvironment && (
+            <View className='pricing-card test-mode'>
+            <View className='test-badge'>🧪 测试专用</View>
+            <View className='card-header'>
+              <Text className='plan-name'>{PAYMENT_PRICES.daily.label}</Text>
+              <View className='plan-price'>
+                <Text className='currency'>¥</Text>
+                <Text className='price'>{formatPrice(PAYMENT_PRICES.daily.price * 100)}</Text>
+                <Text className='period'>/天</Text>
+              </View>
+            </View>
+            <View className='card-benefits'>
+              <Text>• 体验所有 Pro 功能</Text>
+              <Text>• 有效期 1 天（24小时）</Text>
+              <Text>• 用于支付流程测试</Text>
+              <Text className='test-warning'>⚠️ 仅用于测试，正式环境请选择下方方案</Text>
+            </View>
+            <Button
+              className='upgrade-btn test'
+              onClick={() => handleUpgrade('daily')}
+              disabled={upgrading}
+            >
+              {upgrading ? '处理中...' : `立即体验 (¥${PAYMENT_PRICES.daily.price})`}
+            </Button>
+            </View>
+          )}
 
           <View className='pricing-card monthly'>
             <View className='card-header'>

@@ -307,3 +307,63 @@ page {
   transform: scale(0.98);
   opacity: 0.9;
 }
+
+/* 🧪 测试模式卡片样式 */
+.pricing-card.test-mode {
+  background: linear-gradient(135deg, #FFF9E6 0%, #FFE6CC 100%);
+  border: 2PX dashed #FFA500;
+  position: relative;
+  margin-bottom: 24PX;
+}
+
+.test-badge {
+  position: absolute;
+  top: -12PX;
+  right: 16PX;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  color: #fff;
+  padding: 4PX 12PX;
+  border-radius: 12PX;
+  font-size: 12PX;
+  font-weight: 600;
+  box-shadow: 0 2PX 8PX rgba(255, 107, 107, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.pricing-card.test-mode .card-header .plan-name {
+  color: #FF8C00;
+  font-weight: 700;
+}
+
+.pricing-card.test-mode .plan-price .price {
+  color: #FF4500;
+  font-size: 36PX;
+  font-weight: 800;
+}
+
+.test-warning {
+  color: #DC2626 !important;
+  font-weight: 600 !important;
+  font-size: 13PX !important;
+  margin-top: 4PX;
+}
+
+.upgrade-btn.test {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%) !important;
+  border: none !important;
+  box-shadow: 0 4PX 12PX rgba(255, 107, 107, 0.3);
+}
+
+.upgrade-btn.test::after {
+  border: none !important;
+}
+
+.upgrade-btn.test:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}

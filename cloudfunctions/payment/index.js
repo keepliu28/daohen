@@ -22,6 +22,7 @@ const PAYMENT_CONFIG = {
 
 // 价格方案（单位：分）
 const PRICE_PLANS = {
+  daily: { durationDays: 1, price: 1, isTestMode: true },      // ¥0.01/天（测试专用）
   monthly: { durationMonths: 1, price: 190 },    // ¥1.9/月 = 190分
   yearly: { durationMonths: 12, price: 1990 }     // ¥19.9/年 = 1990分
 }
@@ -104,8 +105,10 @@ async function createOrder(openid, data) {
       _id: orderId,
       openid,
       planType,
-      durationMonths: plan.durationMonths,
+      durationMonths: plan.durationMonths || 0,
+      durationDays: plan.durationDays || 0,      // 支持按天计费
       price: plan.price,                    // 单位：分
+      isTestMode: plan.isTestMode || false, // 标记测试订单
       status: 'pending',                    // pending → paid → failed
       createTime: db.serverDate(),
       updateTime: db.serverDate(),
@@ -298,12 +301,23 @@ async function handlePaymentNotify(event) {
     })
 
     // 4. **关键：激活用户Pro会员**
-    const expiryTime = Date.now() + order.durationMonths * 30 * 24 * 60 * 60 * 1000
-    
+    // 计算过期时间：支持按月或按天
+    let expiryTime
+    if (order.durationDays > 0) {
+      // 按天计费（测试模式）
+      expiryTime = Date.now() + order.durationDays * 24 * 60 * 60 * 1000
+      console.log(`[Payment] 使用按天计费: ${order.durationDays}天`)
+    } else {
+      // 按月计费（正式模式）
+      expiryTime = Date.now() + order.durationMonths * 30 * 24 * 60 * 60 * 1000
+      console.log(`[Payment] 使用按月计费: ${order.durationMonths}个月`)
+    }
+
     await db.collection('users').where({ openid: order.openid }).update({
       data: {
         isPro: true,
         proExpiry: expiryTime,
+        isTestMode: order.isTestMode || false,  // 标记是否为测试会员
         proActivatedAt: db.serverDate(),
         activatedByOrderId: orderId,
         updateTime: db.serverDate()
@@ -311,7 +325,8 @@ async function handlePaymentNotify(event) {
       multi: false  // 只更新一条记录
     })
 
-    console.log(`[Payment] ✅ 用户 ${order.openid} 已开通Pro会员，有效期至 ${new Date(expiryTime).toLocaleDateString()}`)
+    const expiryDate = new Date(expiryTime).toLocaleDateString()
+    console.log(`[Payment] ✅ 用户 ${order.openid} 已开通Pro会员，有效期至 ${expiryDate}${order.isTestMode ? '（测试模式）' : ''}`)
 
     return {
       success: true,

@@ -29,11 +29,22 @@ export interface PaymentParams {
   paySign: string
 }
 
+export type PlanType = 'daily' | 'monthly' | 'yearly'
+
 // ---------------------------------------------------------------------------
 // 价格配置（单位：元）
 // ---------------------------------------------------------------------------
 
 export const PAYMENT_PRICES = {
+  daily: {
+    price: 0.01,            // ¥0.01/天（测试专用）
+    durationMonths: 0,      // 0个月，使用天数
+    durationDays: 1,        // 1天
+    label: '体验会员',
+    originalPrice: null,
+    badge: '🧪 测试',
+    isTestMode: true        // 标记为测试模式
+  },
   monthly: {
     price: 1.9,           // ¥1.9/月
     durationMonths: 1,
@@ -90,10 +101,10 @@ async function callPaymentCloudFunction(action: string, data: any = {}): Promise
 
 /**
  * 发起微信支付流程
- * @param planType 订阅方案类型：'monthly'(月度) | 'yearly'(年度)
+ * @param planType 订阅方案类型：'daily'(测试/天) | 'monthly'(月度) | 'yearly'(年度)
  * @returns 支付结果
  */
-export async function requestPayment(planType: 'monthly' | 'yearly'): Promise<PaymentResult> {
+export async function requestPayment(planType: PlanType): Promise<PaymentResult> {
   console.log(`[Payment] 开始发起支付, 方案: ${planType}`)
 
   try {
@@ -232,12 +243,24 @@ export function formatPrice(priceInCents: number): string {
  * 获取价格描述文本
  * @param planType 方案类型
  */
-export function getPriceDescription(planType: 'monthly' | 'yearly'): string {
+export function getPriceDescription(planType: PlanType): string {
   const config = PAYMENT_PRICES[planType]
-  
+
+  if (planType === 'daily') {
+    return `¥${config.price}/天（测试专用）`
+  }
+
   if (planType === 'yearly' && config.originalPrice) {
     return `¥${config.price}/年（原价¥${config.originalPrice}，${config.saving}）`
   }
-  
+
   return `¥${config.price}/月`
+}
+
+/**
+ * 判断是否为测试方案
+ * @param planType 方案类型
+ */
+export function isTestPlan(planType: PlanType): boolean {
+  return PAYMENT_PRICES[planType]?.isTestMode || false
 }
