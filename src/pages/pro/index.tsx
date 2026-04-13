@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { View, Text, Button, Image } from '@tarojs/components'
 import Taro from '@tarojs/taro'
-import { getUserSubscription, upgradeToPro, SUBSCRIPTION_CONFIG, deleteUserAccount } from '../../utils/storage'
+import { getUserSubscription, deleteUserAccount } from '../../utils/storage'
+import { requestPayment, PAYMENT_PRICES, formatPrice } from '../../utils/payment'
 import './index.scss'
 
 const PRO_FEATURES = [
@@ -31,36 +32,59 @@ export default function ProPage() {
     }
   }
 
-  const handleUpgrade = async (durationMonths: number) => {
+  const handleUpgrade = async (planType: 'monthly' | 'yearly') => {
     try {
       setUpgrading(true)
-      Taro.showLoading({ title: '升级中...' })
+      Taro.showLoading({ title: '正在创建订单...' })
 
-      const success = await upgradeToPro(durationMonths)
+      // 调用真实支付流程
+      const result = await requestPayment(planType)
 
       Taro.hideLoading()
-      if (success) {
+
+      if (result.success) {
+        // 支付成功
         Taro.showToast({
-          title: '升级成功',
+          title: '🎉 开通成功',
           icon: 'success',
           duration: 2000
         })
-        // 重新加载订阅状态
+        
+        // 重新加载订阅状态以刷新UI
         await loadSubscription()
+        
+        // 延迟返回上一页（可选）
+        setTimeout(() => {
+          Taro.navigateBack()
+        }, 1500)
       } else {
-        Taro.showModal({
-          title: '升级失败',
-          content: '请稍后重试',
-          showCancel: false
-        })
+        // 支付失败或取消
+        if (result.error === 'USER_CANCELLED') {
+          console.log('[ProPage] 用户取消支付')
+          // 用户主动取消，不显示错误提示
+        } else {
+          Taro.showModal({
+            title: '支付失败',
+            content: result.message || result.error || '请稍后重试',
+            confirmText: '重试',
+            cancelText: '稍后再说',
+            success: (res) => {
+              if (res.confirm) {
+                // 用户选择重试
+                handleUpgrade(planType)
+              }
+            }
+          })
+        }
       }
-    } catch (error) {
-      console.error('[ProPage] 升级失败:', error)
+    } catch (error: any) {
+      console.error('[ProPage] 支付异常:', error)
       Taro.hideLoading()
       Taro.showModal({
-        title: '升级失败',
-        content: error.message || '请稍后重试',
-        showCancel: false
+        title: '支付异常',
+        content: error.message || '网络异常，请检查网络后重试',
+        showCancel: false,
+        confirmText: '知道了'
       })
     } finally {
       setUpgrading(false)
@@ -237,13 +261,13 @@ export default function ProPage() {
       {!isPro && (
         <View className='pro-pricing'>
           <View className='pricing-title'>选择适合您的方案</View>
-          
+
           <View className='pricing-card monthly'>
             <View className='card-header'>
-              <Text className='plan-name'>月度 Pro</Text>
+              <Text className='plan-name'>{PAYMENT_PRICES.monthly.label}</Text>
               <View className='plan-price'>
                 <Text className='currency'>¥</Text>
-                <Text className='price'>1.9</Text>
+                <Text className='price'>{formatPrice(PAYMENT_PRICES.monthly.price * 100)}</Text>
                 <Text className='period'>/月</Text>
               </View>
             </View>
@@ -251,37 +275,37 @@ export default function ProPage() {
               <Text>• 所有 Pro 功能</Text>
               <Text>• 就像一瓶水的价格</Text>
             </View>
-            <Button 
-              className='upgrade-btn' 
-              onClick={() => handleUpgrade(1)}
+            <Button
+              className='upgrade-btn'
+              onClick={() => handleUpgrade('monthly')}
               disabled={upgrading}
             >
-              {upgrading ? '升级中...' : '开通月度 Pro'}
+              {upgrading ? '处理中...' : `开通${PAYMENT_PRICES.monthly.label} (¥${PAYMENT_PRICES.monthly.price})`}
             </Button>
           </View>
 
           <View className='pricing-card yearly recommended'>
-            <View className='recommended-badge'>推荐</View>
+            <View className='recommended-badge'>{PAYMENT_PRICES.yearly.badge}</View>
             <View className='card-header'>
-              <Text className='plan-name'>年度 Pro</Text>
+              <Text className='plan-name'>{PAYMENT_PRICES.yearly.label}</Text>
               <View className='plan-price'>
                 <Text className='currency'>¥</Text>
-                <Text className='price'>19.9</Text>
+                <Text className='price'>{formatPrice(PAYMENT_PRICES.yearly.price * 100)}</Text>
                 <Text className='period'>/年</Text>
               </View>
             </View>
             <View className='card-benefits'>
               <Text>• 所有 Pro 功能</Text>
-              <Text>• 省 13% 相当于 ¥1.6/月</Text>
+              <Text>• {PAYMENT_PRICES.yearly.saving} 相当于 ¥1.6/月</Text>
               <Text>• 就像一杯奶茶的价格</Text>
               <Text>• 赠送年度心路报告</Text>
             </View>
-            <Button 
-              className='upgrade-btn primary' 
-              onClick={() => handleUpgrade(12)}
+            <Button
+              className='upgrade-btn primary'
+              onClick={() => handleUpgrade('yearly')}
               disabled={upgrading}
             >
-              {upgrading ? '升级中...' : '开通年度 Pro (省 13%)'}
+              {upgrading ? '处理中...' : `开通${PAYMENT_PRICES.yearly.label} (¥${PAYMENT_PRICES.yearly.price}, ${PAYMENT_PRICES.yearly.saving})`}
             </Button>
           </View>
         </View>

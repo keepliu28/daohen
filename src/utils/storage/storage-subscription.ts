@@ -89,10 +89,17 @@ export const showQuotaUpgradeModal = (quotaType: 'entries', current: number, lim
 };
 
 // ---------------------------------------------------------------------------
-// 升级 Pro
+// 升级 Pro（管理用途）
+// 注意：此函数仅用于管理员手动开通，普通用户请使用 payment.ts 中的 requestPayment()
 // ---------------------------------------------------------------------------
 
+/**
+ * @deprecated 管理员手动开通Pro会员（不经过支付流程）
+ * @param durationMonths 开通月数
+ */
 export const upgradeToPro = async (durationMonths = 1): Promise<boolean> => {
+  console.warn('[upgradeToPro] ⚠️ 此为管理接口，建议使用支付流程');
+
   const openid = getOpenId();
   if (!openid) throw new Error('用户未登录');
 
@@ -116,7 +123,7 @@ export const upgradeToPro = async (durationMonths = 1): Promise<boolean> => {
       });
     }
 
-    console.log(`[upgradeToPro] 用户 ${openid} 已升级 Pro`);
+    console.log(`[upgradeToPro] 用户 ${openid} 已通过管理方式升级 Pro`);
     return true;
   } catch (error) {
     console.error('[upgradeToPro] 升级失败:', error);
