@@ -457,9 +457,24 @@ export default function Index() {
 
   const handleBottomMoodView = async () => {
     triggerVibrate('light')
-    // 底部 🔮 按钮：3D 心情球体统计（首页内切换）
-    setView('mood')
-    triggerVibrate('medium')
+    // 底部 🔮 按钮：3D 心情球体统计（Pro 专属功能）
+    const subscription = await getUserSubscription()
+    if (subscription.isPro) {
+      setView('mood')
+      triggerVibrate('medium')
+    } else {
+      Taro.showModal({
+        title: 'Pro 功能',
+        content: '3D 心情球体是 Pro 会员专属功能，升级后可直观查看情绪分布与变化趋势。',
+        confirmText: '了解 Pro',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            Taro.navigateTo({ url: '/pages/pro/index' })
+          }
+        }
+      })
+    }
   }
 
   const handleEdit = () => {
