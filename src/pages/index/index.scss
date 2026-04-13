@@ -465,28 +465,43 @@ text, view, input, textarea {
 /* 日历视图 */
 .calendar-section {
   background: #FFFFFF;
-  border-radius: 32PX;
-  padding: 16PX;
-  margin-bottom: 24PX;
+  border-radius: 24PX;
+  padding: 12PX;
+  margin-bottom: 20PX;
   box-shadow: 0 8PX 24PX var(--stone-shadow);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24PX; }
-.calendar-title { font-size: 20PX; font-weight: 700; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4PX; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16PX; }
+.calendar-title { font-size: 18PX; font-weight: 700; }
+.calendar-week-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2PX; margin-bottom: 8PX; }
+.week-day { font-size: 12PX; text-align: center; color: #8E8E93; font-weight: 500; }
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2PX;
+  width: 100%;
+}
 .calendar-day {
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 14PX;
+  border-radius: 12PX;
   position: relative;
+  padding: 2PX;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .calendar-day.selected { background: var(--apple-blue); color: #FFFFFF; }
-.day-num { font-size: 17PX; font-weight: 600; }
-.day-lunar { font-size: 10PX; opacity: 0.6; }
+.day-num { font-size: 15PX; font-weight: 600; line-height: 1.2; }
+.day-lunar { font-size: 9PX; opacity: 0.6; line-height: 1.1; margin-top: 1PX; }
 .entry-dot { width: 4PX; height: 4PX; background: var(--apple-green); border-radius: 50%; position: absolute; bottom: 4PX; }
 
 .year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12PX; }
@@ -925,12 +940,35 @@ text, view, input, textarea {
   /* 小屏设备：内容区底部间距稍减 */
   .view-container {
     padding-bottom: 110PX;
+    padding: 0 16PX;  /* 减小左右padding */
   }
 
   /* 小屏：导航栏内边距稍紧凑 */
   .fixed-bottom-nav {
     padding: 10PX 20PX;
     padding-bottom: calc(10PX + env(safe-area-inset-bottom));
+  }
+
+  /* 小屏：日历优化 */
+  .calendar-section {
+    padding: 10PX;
+    border-radius: 20PX;
+  }
+
+  .calendar-title {
+    font-size: 16PX;
+  }
+
+  .day-num {
+    font-size: 14PX;
+  }
+
+  .day-lunar {
+    font-size: 8PX;
+  }
+
+  .calendar-grid {
+    gap: 1PX;
   }
 }
 

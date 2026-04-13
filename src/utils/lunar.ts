@@ -28,7 +28,7 @@ export function solar2lunar(year: number, month: number, day: number): {
     const lunarYear = lunar.getYear()
     const lunarMonth = lunar.getMonth()
     const lunarDay = lunar.getDay()
-    const isLeap = false // lunar-javascript 没有直接的 isLeap 方法，需要通过其他方式判断
+    const isLeap = lunar.isLeap()  // 判断是否为闰月
     
     return {
       lunarYear,
