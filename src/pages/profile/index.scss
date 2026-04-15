@@ -113,6 +113,33 @@
   color: #FF3B30 !important;
 }
 
+/* 我的订单特殊样式 */
+.orders-item {
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.06) 0%, rgba(88, 86, 214, 0.03) 100%);
+  border-radius: 12PX;
+  margin: 8PX -20PX;
+  padding: 18PX 20PX !important;
+
+  .menu-title {
+    color: #007AFF;
+    font-weight: 600;
+  }
+
+  .menu-desc {
+    color: rgba(0, 122, 255, 0.7);
+    font-size: 12PX;
+  }
+
+  .arrow-icon {
+    color: #007AFF;
+  }
+
+  &:active {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.12) 0%, rgba(88, 86, 214, 0.06) 100%);
+    opacity: 1;
+  }
+}
+
 /* 用户反馈特殊样式 */
 .feedback-item {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.03) 100%);

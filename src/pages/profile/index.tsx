@@ -120,6 +120,9 @@ export default function ProfilePage() {
       case 'pro':
         Taro.navigateTo({ url: '/pages/pro/index' })
         break
+      case 'orders':
+        Taro.navigateTo({ url: '/pages/orders/index' })
+        break
       case 'feedback':
         setShowFeedback(true)
         break
@@ -224,6 +227,15 @@ export default function ProfilePage() {
             {!subscription?.isPro && (
               <Text className='menu-desc'>解锁无限记录 + 密码锁 + 心情印记</Text>
             )}
+          </View>
+          <Text className='arrow-icon'>›</Text>
+        </View>
+
+        {/* 我的订单 */}
+        <View className='menu-item orders-item' onClick={() => handleMenuClick('orders')}>
+          <View className='menu-left'>
+            <Text className='menu-title'>我的订单</Text>
+            <Text className='menu-desc'>查看购买记录和会员状态</Text>
           </View>
           <Text className='arrow-icon'>›</Text>
         </View>

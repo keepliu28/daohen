@@ -1,7 +1,7 @@
 {
   "name": "payment",
-  "version": "2.0.0",
-  "description": "道痕Pro会员微信支付云函数（V3公钥模式）",
+  "version": "3.0.0",
+  "description": "道痕Pro会员微信支付云函数（使用官方SDK）",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "wx-server-sdk": "~2.6.3",
-    "axios": "^1.6.0"
+    "@wechatpay/api-v3": "^2.1.0"
   }
 }

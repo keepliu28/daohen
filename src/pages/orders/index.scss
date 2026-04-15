@@ -1,0 +1,278 @@
+.orders-page {
+  min-height: 100vh;
+  background: #F2F2F7;
+  padding-bottom: calc(20PX + env(safe-area-inset-bottom));
+}
+
+/* 顶部导航栏 */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60PX 24PX 32PX;
+}
+
+.title {
+  font-size: 28PX;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: block;
+  margin-bottom: 6PX;
+}
+
+.subtitle {
+  font-size: 14PX;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+}
+
+/* Tab 切换 */
+.tabs {
+  display: flex;
+  background: #FFFFFF;
+  margin: -16PX 16PX 0;
+  border-radius: 12PX;
+  padding: 4PX;
+  box-shadow: 0 4PX 12PX rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6PX;
+  padding: 12PX;
+  border-radius: 8PX;
+  transition: all 0.3s ease;
+
+  Text {
+    font-size: 14PX;
+    color: #8E8E93;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  &.active {
+    background: #667eea;
+
+    Text {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .tab-badge {
+      background: rgba(255, 255, 255, 0.9);
+      color: #667eea;
+    }
+  }
+}
+
+.tab-badge {
+  background: #E5E5EA;
+  color: #8E8E93;
+  font-size: 11PX;
+  padding: 2PX 6PX;
+  border-radius: 10PX;
+  min-width: 18PX;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* 订单列表 */
+.orders-list {
+  height: calc(100vh - 200PX);
+  padding: 16PX;
+}
+
+/* 加载状态 */
+.loading-container,
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80PX 24PX;
+}
+
+.loading-text {
+  font-size: 14PX;
+  color: #8E8E93;
+}
+
+.empty-icon {
+  font-size: 80PX;
+  margin-bottom: 20PX;
+}
+
+.empty-title {
+  font-size: 17PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 8PX;
+  display: block;
+}
+
+.empty-desc {
+  font-size: 14PX;
+  color: #8E8E93;
+  display: block;
+}
+
+/* 订单卡片 */
+.order-card {
+  background: #FFFFFF;
+  border-radius: 16PX;
+  margin-bottom: 12PX;
+  overflow: hidden;
+  box-shadow: 0 2PX 8PX rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: 0 4PX 12PX rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16PX 16PX 12PX;
+  border-bottom: 1PX solid #F2F2F7;
+}
+
+.plan-info {
+  display: flex;
+  align-items: center;
+  gap: 12PX;
+}
+
+.plan-icon {
+  font-size: 32PX;
+  line-height: 1;
+}
+
+.plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2PX;
+}
+
+.plan-name {
+  font-size: 16PX;
+  font-weight: 600;
+  color: #1C1C1E;
+  line-height: 1.3;
+}
+
+.plan-desc {
+  font-size: 12PX;
+  color: #8E8E93;
+  line-height: 1.3;
+}
+
+.status-tag {
+  padding: 4PX 10PX;
+  border-radius: 12PX;
+  font-size: 12PX;
+  font-weight: 600;
+}
+
+/* 卡片内容 */
+.card-body {
+  padding: 12PX 16PX;
+}
+
+.price-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8PX;
+}
+
+.price-label {
+  font-size: 13PX;
+  color: #8E8E93;
+}
+
+.price-value {
+  font-size: 22PX;
+  font-weight: 700;
+  color: #FF3B30;
+  line-height: 1;
+}
+
+.order-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12PX;
+}
+
+.meta-item {
+  font-size: 11PX;
+  color: #AEAEB2;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 底部操作 */
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12PX;
+  padding: 12PX 16PX;
+  border-top: 1PX solid #F2F2F7;
+}
+
+.action-btn {
+  padding: 8PX 20PX;
+  border-radius: 20PX;
+  font-size: 13PX;
+  font-weight: 500;
+  border: 1PX solid #E5E5EA;
+  color: #8E8E93;
+  
+  &.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+    
+    &:active {
+      opacity: 0.9;
+      transform: scale(0.96);
+    }
+  }
+  
+  &.secondary {
+    background: #F2F2F7;
+    color: #667eea;
+    border: none;
+  }
+  
+  &.cancel {
+    background: transparent;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+/* 底部提示 */
+.footer-tip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6PX;
+  padding: 24PX;
+
+  Text {
+    font-size: 12PX;
+    color: #AEAEB2;
+  }
+}
