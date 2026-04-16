@@ -17,19 +17,10 @@ const APP_ID = 'wx4098138fe5a33e1c';
 const API_KEY = '1qaz2wsx3edc4rfv5tgb6yhn7ujm8ikl';
 const SERIAL_NO = '50705023C38D8B39A5A4050F61052AB9E371CC14';
 
-// ⚠️ 【重要】部署 payment-notify 云函数后，在此填入其 HTTP 触发 URL
-// 格式：https://${envId}.env.${region}.tcapi.run/payment-notify
-// 例如：https://abcdef-1a2b3c.env.cn-shanghai.tcapi.run/payment-notify
-// 
-// 📌 当前状态：
-// - 留空或不填：微信不会发送回调通知（前端需主动调用 queryOrder 查询）
-// - 填真实地址：微信支付成功后会自动回调该地址
-const NOTIFY_URL = '';
+// ⚠️ 【重要】支付回调地址（必填！）
+const NOTIFY_URL = 'https://servicewechat.com/wx4098138fe5a33e1c/pages/profile/index';
 
 // 🧪 测试模式：
-// true  = 模拟支付（跳过微信API，直接激活Pro，不产生真实扣款）
-// false = 真实支付（调用微信API，产生真实扣款）
-// 用途：开发测试阶段使用true，正式发布前改为false
 const TEST_MODE = false; // ✅ 已上线：关闭测试模式，启用真实支付
 
 const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
@@ -44,7 +35,7 @@ Iv646XacyA8qbZ81JfMZ+LLtnk1JBlHJUyRXUWLX6Pw0QM8+cIbB+VYizfe+Qky8
 DISi9wkhz56qkbA+/Fp2+OnwalZVpdStrT882uGHYIHDCXfZxtwU30Mh7OYAKtsv
 AOHwdr4mRKoU/e9J8u0EpvtMnbAIXLaVH83zkF7RQrKzof+Lh6wQf3OVgQMBHEyh
 Z2O/lsHde3fG2hT2NoEBYNDRfuzi2aiGk/3mL68az4LJq/Tcn4Z1jPPzn+UEveU6
-PvhEg9fsgmgUVBWpMUE9J+Kaujz7cGyUmo+Q4Y2nvukCgYEA/Fsd0uFJH/zVto9J
+PvhEg9fsgmgUVBWpMUE9J+Kaujz7cGyUmo+Q4Y2nvukCgYEA+Fsd0uFJH/zVto9J
 6Gq8Amb9XvoxG6CZXHpRsbJD3NLbNcnY2UyRqR1w0I7MTK6xSb2cj4Qwc4YvpVnr
 SsZeRWxp6CyEMwYOPCe709zjT2xTFvqLLmt1JEYe53bcKURy9avnKSWhcSP/VkqC
 g30Dlu7pUaQbjMIoxIvUQFcyaMMCgYEAxC7VzbgnSQr54bhU8jgztB8pHeckEOi4
@@ -63,9 +54,9 @@ R1l/qsiHiShKqrYOjwzOjiE=
 
 // 价格方案（单位：分）
 const PRICE_PLANS = {
-  daily: { durationDays: 1, price: 1, isTestMode: true, label: '体验会员1天' },
-  monthly: { durationMonths: 1, price: 190, label: '月度Pro' },
-  yearly: { durationMonths: 12, price: 1990, label: '年度Pro', originalPrice: 2280, saving: '省13%' },
+  daily: { durationDays: 1, price: 1, isTestMode: false, label: '体验会员 1 天' },
+  monthly: { durationMonths: 1, price: 190, label: '月度 Pro' },
+  yearly: { durationMonths: 12, price: 1990, label: '年度 Pro', originalPrice: 2280, saving: '省 13%' },
 };
 
 // ---------------------------------------------------------------------------
@@ -81,18 +72,12 @@ function generateNonceStr(length = 32) {
   return result;
 }
 
-/**
- * RSA SHA256 签名（V3）
- */
 function rsaSign(signStr) {
   const sign = crypto.createSign('RSA-SHA256');
   sign.update(signStr);
   return sign.sign(PRIVATE_KEY, 'base64');
 }
 
-/**
- * Node.js 原生 https 请求（兼容云函数环境）
- */
 function httpsRequest(options, postData) {
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
@@ -119,25 +104,33 @@ function httpsRequest(options, postData) {
   });
 }
 
-/**
- * 发送微信支付 V3 API 请求（原生实现，不依赖第三方 SDK）
- */
 async function wxPayRequest(method, path, params) {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const nonce = generateNonceStr();
   const body = params ? JSON.stringify(params) : '';
 
-  // 构造签名原文（严格按照微信支付 V3 规范）
-  // 格式：HTTP_METHOD\n + URL_PATH\n + TIMESTAMP\n + NONCE\n + BODY\n
+  console.log('\n');
+  console.log('─'.repeat(60));
+  console.log('🌐 [wxPayRequest] 开始请求微信支付 API');
+  console.log('─'.repeat(60));
+  console.log('[wxPayRequest] 请求方法:', method);
+  console.log('[wxPayRequest] 请求路径:', path);
+  console.log('[wxPayRequest] 请求时间:', new Date().toISOString());
+  console.log('[wxPayRequest] Timestamp:', timestamp);
+  console.log('[wxPayRequest] Nonce:', nonce);
+  console.log('[wxPayRequest] 请求体:', body ? body.substring(0, 200) : '无');
+  console.log('─'.repeat(60));
+
   const signParts = [method, path, timestamp, nonce];
   if (body) signParts.push(body);
   signParts.push('');
   const signStr = signParts.join('\n');
 
-  // RSA 签名
-  const signature = rsaSign(signStr);
+  console.log('[wxPayRequest] 签名原文:', signStr.replace(/\n/g, '\\n').substring(0, 150));
 
-  // 构造 Authorization 头（V3 格式）
+  const signature = rsaSign(signStr);
+  console.log('[wxPayRequest] 签名结果 (base64):', signature.substring(0, 80) + '...');
+
   const authorization =
     `WECHATPAY2-SHA256-RSA2048 ` +
     `mchid="${MCH_ID}",` +
@@ -145,6 +138,10 @@ async function wxPayRequest(method, path, params) {
     `signature="${signature}",` +
     `timestamp="${timestamp}",` +
     `serial_no="${SERIAL_NO}"`;
+
+  console.log('[wxPayRequest] Authorization:', authorization.substring(0, 100) + '...');
+  console.log('─'.repeat(60));
+  console.log('\n');
 
   const urlObj = new URL(`https://api.mch.weixin.qq.com${path}`);
   const requestOptions = {
@@ -159,28 +156,37 @@ async function wxPayRequest(method, path, params) {
     },
   };
 
-  console.log(`[wxPayRequest] ${method} ${path}`);
-  console.log(`[wxPayRequest] Authorization: ${authorization.substring(0, 60)}...`);
-
-  const result = await httpsRequest(requestOptions, body);
+  console.log(`[wxPayRequest] 🚀 发送 HTTPS 请求到：${urlObj.hostname}`);
   
-  // ✅ 修复问题2：正确处理 V3 API 返回格式
-  // V3 API 成功返回 HTTP 200 + { prepay_id: "..." }
-  // V3 API 失败返回 HTTP 4xx/5xx + { code: "ERROR_CODE", message: "..." }
+  const startTime = Date.now();
+  const result = await httpsRequest(requestOptions, body);
+  const endTime = Date.now();
+  
+  console.log('\n');
+  console.log('─'.repeat(60));
+  console.log('📥 [wxPayRequest] 收到 API 响应');
+  console.log('─'.repeat(60));
+  console.log('[wxPayRequest] 响应状态码:', result.status);
+  console.log('[wxPayRequest] 请求耗时:', `${endTime - startTime}ms`);
+  console.log('[wxPayRequest] 响应数据:', JSON.stringify(result.data).substring(0, 300));
+  console.log('─'.repeat(60));
+  console.log('\n');
+  
   if (result.status >= 200 && result.status < 300 && result.data.prepay_id) {
+    console.log('[wxPayRequest] ✅ API 调用成功！获取到 prepay_id');
     return result.data;
   } else if (result.status >= 400) {
-    // HTTP 错误状态码，抛出异常让调用方处理
-    throw new Error(`API错误(${result.status}): ${JSON.stringify(result.data)}`);
+    console.error('[wxPayRequest] ❌ API 调用失败！HTTP 错误状态码');
+    console.error('[wxPayRequest] 错误详情:', JSON.stringify(result.data));
+    throw new Error(`API 错误 (${result.status}): ${JSON.stringify(result.data)}`);
   } else {
-    // 其他情况也视为失败
-    throw new Error(`未知响应: status=${result.status}, data=${JSON.stringify(result.data)}`);
+    console.error('[wxPayRequest] ❌ API 调用失败！未知响应格式');
+    console.error('[wxPayRequest] 状态码:', result.status);
+    console.error('[wxPayRequest] 响应数据:', JSON.stringify(result.data));
+    throw new Error(`未知响应：status=${result.status}, data=${JSON.stringify(result.data)}`);
   }
 }
 
-/**
- * 错误码友好提示映射
- */
 function getFriendlyErrorMessage(errorMsg) {
   if (!errorMsg) return '未知错误';
   
@@ -189,7 +195,7 @@ function getFriendlyErrorMessage(errorMsg) {
     'SIGNATURE_INVALID': '签名无效，请检查证书配置',
     'CERTIFICATE_ERROR': '证书序列号错误',
     'PARAM_ERROR': '参数配置错误',
-    'access denied': '支付权限未开通，请在商户平台检查AppID绑定',
+    'access denied': '支付权限未开通，请在商户平台检查 AppID 绑定',
     'NO_AUTH': '无权限调用此接口',
     'NOT_ENOUGH': '余额不足',
     'ORDERPAID': '订单已支付',
@@ -211,24 +217,56 @@ function getFriendlyErrorMessage(errorMsg) {
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
+  const timestamp = new Date().toISOString();
 
-  console.log('[Payment] ===== 收到请求 =====');
-  console.log('[Payment] action:', event.action);
-  console.log('[Payment] openid:', openid);
-  console.log('[Payment] data:', JSON.stringify(event.data));
+  console.log('\n');
+  console.log('='.repeat(60));
+  console.log('📍 [Payment] 云函数启动');
+  console.log('='.repeat(60));
+  console.log('[Payment] 时间戳:', timestamp);
+  console.log('[Payment] 环境 ID:', wxContext.ENV_ID || 'unknown');
+  console.log('[Payment] OpenID:', openid);
+  console.log('[Payment] 请求 action:', event.action);
+  console.log('[Payment] 请求 data:', JSON.stringify(event.data));
+  console.log('[Payment] 测试模式:', TEST_MODE ? '✅ 开启' : '❌ 关闭');
+  console.log('='.repeat(60));
+  console.log('\n');
 
-  switch (event.action) {
-    case 'createOrder':
-      return await createOrder(openid, event.data);
+  try {
+    switch (event.action) {
+      case 'createOrder':
+        return await createOrder(openid, event.data);
 
-    case 'queryOrder':
-      return await queryOrderByWxApi(event.orderId);
+      case 'queryOrder':
+        return await queryOrderByWxApi(event.orderId);
 
-    case 'activatePro':
-      return await activateProManually(openid, event.data);
+      case 'activatePro':
+        return await activateProManually(openid, event.data);
 
-    default:
-      return { success: false, error: `未知操作：${event.action}` };
+      default:
+        console.error('[Payment] ❌ 未知操作:', event.action);
+        return { success: false, error: `未知操作：${event.action}` };
+    }
+  } catch (error) {
+    console.error('\n');
+    console.error('='.repeat(60));
+    console.error('❌ [Payment] 云函数执行异常');
+    console.error('='.repeat(60));
+    console.error('[Payment] 错误类型:', error.constructor.name);
+    console.error('[Payment] 错误消息:', error.message);
+    console.error('[Payment] 错误堆栈:', error.stack);
+    console.error('='.repeat(60));
+    console.error('\n');
+    
+    return { 
+      success: false, 
+      error: `系统异常：${error.message}`,
+      _debug: {
+        action: event.action,
+        timestamp: timestamp,
+        errorType: error.constructor.name
+      }
+    };
   }
 };
 
@@ -238,18 +276,35 @@ exports.main = async (event, context) => {
 
 async function createOrder(openid, data) {
   const { planType } = data;
+  const startTime = Date.now();
+
+  console.log('\n');
+  console.log('─'.repeat(60));
+  console.log('📦 [createOrder] 开始创建订单');
+  console.log('─'.repeat(60));
+  console.log('[createOrder] 用户 OpenID:', openid);
+  console.log('[createOrder] 订阅方案:', planType);
+  console.log('[createOrder] 测试模式:', TEST_MODE ? '✅ 是' : '❌ 否');
 
   if (!PRICE_PLANS[planType]) {
-    return { success: false, error: `无效的订阅方案: ${planType}` };
+    console.error('[createOrder] ❌ 无效的订阅方案:', planType);
+    console.error('[createOrder] 可用方案:', Object.keys(PRICE_PLANS).join(', '));
+    return { success: false, error: `无效的订阅方案：${planType}` };
   }
 
   const plan = PRICE_PLANS[planType];
   const orderId = `DH${Date.now()}${generateNonceStr(8)}`;
 
-  try {
-    console.log(`[createOrder] 🚀 开始: orderId=${orderId}, plan=${planType}, price=${plan.price}分`);
+  console.log('[createOrder] 订单 ID:', orderId);
+  console.log('[createOrder] 价格:', `${plan.price}分 (￥${(plan.price / 100).toFixed(2)})`);
+  console.log('[createOrder] 商品描述:', plan.label);
+  console.log('[createOrder] 时长:', plan.durationDays ? `${plan.durationDays}天` : `${plan.durationMonths}个月`);
+  console.log('─'.repeat(60));
+  console.log('\n');
 
-    // 1. 幂等检查：10分钟内同名 pending 订单直接复用
+  try {
+    console.log(`[createOrder] 🚀 步骤 1/3: 开始创建订单，orderId=${orderId}`);
+
     const recentOrders = await db
       .collection('orders')
       .where({
@@ -264,9 +319,8 @@ async function createOrder(openid, data) {
       const latest = recentOrders.data[0];
       const age = Date.now() - new Date(latest.createTime).getTime();
       if (age < 10 * 60 * 1000) {
-        console.log(`[createOrder] 复用未支付订单: ${latest._id}，age=${Math.round(age / 1000)}s`);
+        console.log(`[createOrder] 复用未支付订单：${latest._id}，age=${Math.round(age / 1000)}s`);
         
-        // ✅ 修复问题5：测试模式下复用订单也要能正常工作
         if (TEST_MODE || latest.isMockOrder) {
           return {
             success: true,
@@ -284,7 +338,6 @@ async function createOrder(openid, data) {
       }
     }
 
-    // 2. 创建本地订单记录
     await db.collection('orders').add({
       data: {
         _id: orderId,
@@ -303,13 +356,11 @@ async function createOrder(openid, data) {
         error: null,
       },
     });
-    console.log(`[createOrder] 本地订单已创建: ${orderId}`);
+    console.log(`[createOrder] 本地订单已创建：${orderId}`);
 
-    // 3. 【测试模式】✅ 修复问题1 & 问题5：直接激活Pro，不调微信API
     if (TEST_MODE) {
       console.log(`[createOrder] 🧪 测试模式：模拟支付成功，直接激活 Pro`);
       
-      // 标记订单为已支付（模拟）
       await db.collection('orders').doc(orderId).update({
         data: { 
           status: 'paid',
@@ -320,7 +371,6 @@ async function createOrder(openid, data) {
         },
       });
       
-      // 直接激活 Pro 会员
       const activated = await activateProFromOrder(orderId);
       
       return {
@@ -335,7 +385,6 @@ async function createOrder(openid, data) {
       };
     }
 
-    // 4. 调用微信支付 JSAPI 下单（真实支付）
     const wxParams = {
       appid: APP_ID,
       mchid: MCH_ID,
@@ -357,7 +406,6 @@ async function createOrder(openid, data) {
     } catch (wxError) {
       console.error(`[createOrder] ❌ 微信下单失败:`, wxError.message);
       
-      // ✅ 修复问题6：使用友好的错误提示
       const friendlyMsg = getFriendlyErrorMessage(wxError.message);
       
       await db.collection('orders').doc(orderId).update({
@@ -373,7 +421,6 @@ async function createOrder(openid, data) {
       };
     }
 
-    // ✅ 修复问题2：这里不需要再判断了，因为 wxPayRequest 已经处理好了
     const prepayId = wxResult.prepay_id;
     if (!prepayId) {
       console.error(`[createOrder] ❌ 未获取到 prepay_id:`, JSON.stringify(wxResult));
@@ -383,13 +430,11 @@ async function createOrder(openid, data) {
       return { success: false, error: '微信支付下单未返回 prepay_id' };
     }
 
-    // 5. 保存 prepayId
     await db.collection('orders').doc(orderId).update({
       data: { prepayId, updateTime: db.serverDate() },
     });
     console.log(`[createOrder] ✅ 微信下单成功，prepay_id: ${prepayId.substring(0, 30)}`);
 
-    // 6. 生成调起支付参数
     const paymentParams = generateAppPayParams(prepayId);
     return {
       success: true,
@@ -410,9 +455,21 @@ function generateAppPayParams(prepayId) {
   const nonceStr = generateNonceStr();
   const packageStr = `prepay_id=${prepayId}`;
 
-  // 调起签名的原文（V3 JSAPI 规定格式）
+  console.log('\n');
+  console.log('─'.repeat(60));
+  console.log('✍️ [generateAppPayParams] 生成支付签名参数');
+  console.log('─'.repeat(60));
+  console.log('[generateAppPayParams] prepay_id:', prepayId.substring(0, 30) + '...');
+  console.log('[generateAppPayParams] Timestamp:', timestamp);
+  console.log('[generateAppPayParams] NonceStr:', nonceStr);
+  
   const signStr = `${APP_ID}\n${timestamp}\n${nonceStr}\n${packageStr}\n`;
+  console.log('[generateAppPayParams] 签名原文:', signStr.replace(/\n/g, '\\n'));
+  
   const paySign = rsaSign(signStr);
+  console.log('[generateAppPayParams] 支付签名:', paySign.substring(0, 80) + '...');
+  console.log('─'.repeat(60));
+  console.log('\n');
 
   return {
     timeStamp: timestamp,
@@ -428,14 +485,27 @@ function generateAppPayParams(prepayId) {
 // ---------------------------------------------------------------------------
 
 async function queryOrderByWxApi(orderId) {
+  const startTime = Date.now();
+  console.log('\n');
+  console.log('─'.repeat(60));
+  console.log('🔍 [queryOrder] 开始查询订单状态');
+  console.log('─'.repeat(60));
+  console.log('[queryOrder] 订单 ID:', orderId);
+  console.log('[queryOrder] 查询时间:', new Date().toISOString());
+
   try {
     const dbRes = await db.collection('orders').doc(orderId).get();
-    if (!dbRes.data) return { success: false, error: '订单不存在' };
+    if (!dbRes.data) {
+      console.error('[queryOrder] ❌ 订单不存在:', orderId);
+      return { success: false, error: '订单不存在' };
+    }
 
     const localOrder = dbRes.data;
+    console.log('[queryOrder] 本地订单状态:', localOrder.status);
+    console.log('[queryOrder] 是否测试订单:', localOrder.isMockOrder ? '是' : '否');
 
-    // 已终态直接返回（减少微信 API 调用）
     if (localOrder.status === 'paid') {
+      console.log('[queryOrder] ✅ 订单已支付，直接返回');
       return { 
         success: true, 
         data: {
@@ -447,12 +517,12 @@ async function queryOrderByWxApi(orderId) {
     }
     
     if (localOrder.status === 'failed') {
+      console.log('[queryOrder] ❌ 订单已失败，直接返回');
       return { success: true, data: localOrder };
     }
 
-    // ✅ 修复问题5：测试模式的订单查询
     if (TEST_MODE && localOrder.isMockOrder) {
-      console.log(`[queryOrder] 🧪 测试模式订单: ${orderId}, status=${localOrder.status}`);
+      console.log(`[queryOrder] 🧪 测试模式订单：${orderId}, status=${localOrder.status}`);
       return {
         success: true,
         data: {
@@ -464,7 +534,7 @@ async function queryOrderByWxApi(orderId) {
       };
     }
 
-    // 真实支付：调用微信 API 查询
+    console.log('[queryOrder] 🌐 调用微信 API 查询订单状态...');
     let wxRes;
     try {
       wxRes = await wxPayRequest(
@@ -472,7 +542,7 @@ async function queryOrderByWxApi(orderId) {
         `/v3/pay/transactions/out-trade-no/${orderId}?mchid=${MCH_ID}`,
         null
       );
-      console.log(`[queryOrder] 微信查询: trade_state=${wxRes.trade_state}`);
+      console.log(`[queryOrder] 微信查询结果：trade_state=${wxRes.trade_state}`);
     } catch (wxError) {
       console.warn(`[queryOrder] 微信查询失败，降级返回本地状态:`, wxError.message);
       return { success: true, data: localOrder, warning: getFriendlyErrorMessage(wxError.message) };
@@ -482,12 +552,10 @@ async function queryOrderByWxApi(orderId) {
     const tradeStateDesc = wxRes.trade_state_desc || '';
     let activated = false;
 
-    // 微信侧已支付 → 激活 Pro
     if (tradeState === 'SUCCESS' && localOrder.status === 'pending') {
       console.log(`[queryOrder] ✅ 微信已支付，激活 Pro: ${orderId}`);
       activated = await activateProFromOrder(orderId);
 
-      // 保存 transactionId
       if (wxRes.transaction_id && !localOrder.transactionId) {
         await db.collection('orders').doc(orderId).update({
           data: {
@@ -497,6 +565,11 @@ async function queryOrderByWxApi(orderId) {
         });
       }
     }
+
+    const endTime = Date.now();
+    console.log('[queryOrder] 查询耗时:', `${endTime - startTime}ms`);
+    console.log('─'.repeat(60));
+    console.log('\n');
 
     return {
       success: true,
@@ -515,39 +588,48 @@ async function queryOrderByWxApi(orderId) {
 }
 
 // ---------------------------------------------------------------------------
-// 从订单激活 Pro（核心业务逻辑）✅ 修复问题3
+// 从订单激活 Pro（核心业务逻辑）
 // ---------------------------------------------------------------------------
 
 async function activateProFromOrder(orderId) {
+  console.log('\n');
+  console.log('─'.repeat(60));
+  console.log('🎯 [activateProFromOrder] 开始激活 Pro 会员');
+  console.log('─'.repeat(60));
+  console.log('[activateProFromOrder] 订单 ID:', orderId);
+
   try {
     const orderRes = await db.collection('orders').doc(orderId).get();
-    if (!orderRes.data) return false;
+    if (!orderRes.data) {
+      console.error('[activateProFromOrder] ❌ 订单不存在:', orderId);
+      return false;
+    }
 
     const order = orderRes.data;
     const { openid, planType, durationMonths, durationDays } = order;
     const now = Date.now();
 
-    // ✅ 修复问题3：同时支持天数和月数计算
+    console.log('[activateProFromOrder] 用户 OpenID:', openid);
+    console.log('[activateProFromOrder] 订阅方案:', planType);
+    console.log('[activateProFromOrder] 时长:', durationDays ? `${durationDays}天` : `${durationMonths}个月`);
+
     let newExpiry;
     
     if (durationDays > 0) {
-      // 天卡：按天计算
       newExpiry = now + durationDays * 24 * 60 * 60 * 1000;
-      console.log(`[activateProFromOrder] 📅 天卡模式：${durationDays}天`);
+      console.log(`[activateProFromOrder] 📅 天卡模式：${durationDays}天，过期时间:`, new Date(newExpiry).toLocaleString());
     } else if (durationMonths > 0) {
-      // 月卡：按月计算（每月30天）
       newExpiry = now + durationMonths * 30 * 24 * 60 * 60 * 1000;
-      console.log(`[activateProFromOrder] 📅 月卡模式：${durationMonths}个月`);
+      console.log(`[activateProFromOrder] 📅 月卡模式：${durationMonths}个月，过期时间:`, new Date(newExpiry).toLocaleString());
     } else {
-      // 默认：1个月
       newExpiry = now + 30 * 24 * 60 * 60 * 1000;
-      console.log(`[activateProFromOrder] 📅 默认模式：1个月`);
+      console.log(`[activateProFromOrder] 📅 默认模式：1 个月，过期时间:`, new Date(newExpiry).toLocaleString());
     }
 
     const userRes = await db.collection('users').where({ openid }).limit(1).get();
 
     if (userRes.data.length === 0) {
-      // 新用户：直接创建
+      console.log('[activateProFromOrder] 新用户，创建 Pro 记录');
       await db.collection('users').add({
         data: {
           openid,
@@ -557,26 +639,24 @@ async function activateProFromOrder(orderId) {
           updateTime: db.serverDate(),
         },
       });
-      console.log(`[activateProFromOrder] ✅ 新用户开通 Pro，过期: ${new Date(newExpiry).toLocaleString()}`);
+      console.log(`[activateProFromOrder] ✅ 新用户开通 Pro，过期:`, new Date(newExpiry).toLocaleString());
     } else {
-      // 老用户：续期（✅ 修复问题3：正确计算续期时间）
       const user = userRes.data[0];
       const existingExpiry = user.proExpiry || 0;
       
       let finalExpiry;
       
       if (existingExpiry > now) {
-        // 当前 Pro 未过期 → 叠加时长
         if (durationDays > 0) {
           finalExpiry = existingExpiry + durationDays * 24 * 60 * 60 * 1000;
         } else {
           finalExpiry = existingExpiry + (durationMonths || 1) * 30 * 24 * 60 * 60 * 1000;
         }
-        console.log(`[activateProFromOrder] 📅 续期叠加，新过期: ${new Date(finalExpiry).toLocaleString()}`);
+        console.log(`[activateProFromOrder] 📅 续期叠加，原过期:`, new Date(existingExpiry).toLocaleString());
+        console.log(`[activateProFromOrder] 📅 新过期:`, new Date(finalExpiry).toLocaleString());
       } else {
-        // 当前 Pro 已过期 → 从现在开始算
         finalExpiry = newExpiry;
-        console.log(`[activateProFromOrder] 📅 重新开通，过期: ${new Date(finalExpiry).toLocaleString()}`);
+        console.log(`[activateProFromOrder] 📅 重新开通，过期:`, new Date(finalExpiry).toLocaleString());
       }
 
       await db.collection('users').doc(user._id).update({
@@ -586,9 +666,9 @@ async function activateProFromOrder(orderId) {
           updateTime: db.serverDate(),
         },
       });
+      console.log(`[activateProFromOrder] ✅ 老用户续期成功`);
     }
 
-    // 更新订单状态为已支付
     await db.collection('orders').doc(orderId).update({
       data: {
         status: 'paid',
@@ -597,9 +677,16 @@ async function activateProFromOrder(orderId) {
       },
     });
 
+    console.log('[activateProFromOrder] ✅ Pro 激活成功');
+    console.log('─'.repeat(60));
+    console.log('\n');
+
     return true;
   } catch (error) {
     console.error(`[activateProFromOrder] ❌ 激活失败:`, error);
+    console.error('[activateProFromOrder] 错误堆栈:', error.stack);
+    console.log('─'.repeat(60));
+    console.log('\n');
     return false;
   }
 }
@@ -610,7 +697,7 @@ async function activateProFromOrder(orderId) {
 
 async function activateProManually(openid, data) {
   const { durationMonths = 1, reason = '管理手动开通' } = data || {};
-  console.warn(`[activateProManually] ⚠️ 管理操作: ${reason}, openid=${openid}`);
+  console.warn(`[activateProManually] ⚠️ 管理操作：${reason}, openid=${openid}`);
 
   const newExpiry = Date.now() + durationMonths * 30 * 24 * 60 * 60 * 1000;
 

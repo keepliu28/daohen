@@ -6,7 +6,9 @@ export default defineAppConfig({
     'pages/pro/index',
     'pages/mood-memories/index',
     'pages/terms/index',
-    'pages/privacy/index'
+    'pages/privacy/index',
+    'pages/diagnose/index',
+    'pages/test-pay/index'
   ],
   window: {
     backgroundTextStyle: 'light',

@@ -1,0 +1,124 @@
+.diagnose-container {
+  padding: 40px 30px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+
+    .title {
+      display: block;
+      font-size: 48px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      display: block;
+      font-size: 28px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  }
+
+  .content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 30px;
+
+    .result {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+
+      .status {
+        text-align: center;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 36px;
+        font-weight: bold;
+
+        &.success {
+          background: #e8f5e9;
+          color: #4caf50;
+        }
+
+        &.error {
+          background: #ffebee;
+          color: #f44336;
+        }
+      }
+
+      .details {
+        margin-top: 20px;
+
+        text {
+          display: block;
+          font-size: 28px;
+          line-height: 1.8;
+          margin-bottom: 12px;
+        }
+
+        &.success-details {
+          text {
+            color: #4caf50;
+          }
+        }
+
+        &.error-details {
+          text {
+            color: #f44336;
+          }
+
+          .error-msg {
+            background: #ffebee;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 26px;
+            word-break: break-all;
+          }
+
+          .solution {
+            margin-top: 24px;
+            padding: 24px;
+            background: #fff3e0;
+            border-radius: 12px;
+            border-left: 4px solid #ff9800;
+
+            .solution-title {
+              font-weight: bold;
+              font-size: 30px;
+              margin-bottom: 16px;
+              display: block;
+            }
+
+            .url {
+              background: #fff;
+              padding: 12px;
+              border-radius: 6px;
+              color: #1976d2;
+              font-family: monospace;
+              font-size: 26px;
+              margin: 12px 0;
+              word-break: break-all;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .footer {
+    margin-top: 40px;
+    text-align: center;
+
+    text {
+      display: block;
+      font-size: 24px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}

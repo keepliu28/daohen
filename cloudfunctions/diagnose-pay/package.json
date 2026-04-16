@@ -1,0 +1,14 @@
+{
+  "name": "diagnose-pay",
+  "version": "1.0.0",
+  "description": "微信支付配置诊断工具",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

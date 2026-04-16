@@ -181,17 +181,106 @@ export async function requestPayment(planType: PlanType): Promise<PaymentResult>
   let payCancelled = false;
   let payErrorMsg = '';
 
+  console.log('\n');
+  console.log('='.repeat(60));
+  console.log('📱 [Payment] 准备调用 Taro.requestPayment');
+  console.log('='.repeat(60));
+  console.log('[Payment] 订单 ID:', orderId);
+  console.log('[Payment] 支付参数 (完整):', JSON.stringify(paymentParams, null, 2));
+  console.log('[Payment] timeStamp:', paymentParams.timeStamp);
+  console.log('[Payment] nonceStr:', paymentParams.nonceStr);
+  console.log('[Payment] package:', paymentParams.package);
+  console.log('[Payment] signType:', paymentParams.signType);
+  console.log('[Payment] paySign (前80字符):', paymentParams.paySign?.substring(0, 80) + '...');
+  console.log('='.repeat(60));
+  console.log('\n');
+
+  // 🔍 重要检查：确认支付参数是否完整
+  if (!paymentParams.timeStamp || !paymentParams.nonceStr || !paymentParams.package || !paymentParams.paySign) {
+    console.error('[Payment] ❌ 支付参数不完整！');
+    console.error('[Payment] timeStamp:', paymentParams.timeStamp);
+    console.error('[Payment] nonceStr:', paymentParams.nonceStr);
+    console.error('[Payment] package:', paymentParams.package);
+    console.error('[Payment] paySign:', paymentParams.paySign);
+    
+    Taro.showModal({
+      title: '支付参数错误',
+      content: '支付参数不完整，请检查网络或重试',
+      showCancel: false
+    });
+    
+    return {
+      success: false,
+      error: 'PARAMS_INCOMPLETE',
+      message: '支付参数不完整'
+    };
+  }
+
   try {
     await new Promise<void>((resolve, reject) => {
+      console.log('[Payment] 🚀 正在调用 Taro.requestPayment...');
+      
+      // 显示加载提示
+      Taro.showLoading({
+        title: '正在调起支付...',
+        mask: true
+      });
+      
       Taro.requestPayment({
-        ...paymentParams,
+        timeStamp: paymentParams.timeStamp,
+        nonceStr: paymentParams.nonceStr,
+        package: paymentParams.package,
+        signType: paymentParams.signType,
+        paySign: paymentParams.paySign,
         success(res) {
-          console.log('[Payment] ✅ Taro.requestPayment 成功:', res);
+          // 隐藏加载提示
+          Taro.hideLoading();
+          
+          console.log('\n');
+          console.log('='.repeat(60));
+          console.log('✅ [Payment] Taro.requestPayment 成功！');
+          console.log('='.repeat(60));
+          console.log('[Payment] 支付结果:', JSON.stringify(res));
+          console.log('='.repeat(60));
+          console.log('\n');
+          
           paySuccess = true;
           resolve();
         },
         fail(err: any) {
-          console.warn('[Payment] ⚠️ Taro.requestPayment 失败:', err);
+          // 隐藏加载提示
+          Taro.hideLoading();
+          
+          console.error('\n');
+          console.error('='.repeat(60));
+          console.error('❌ [Payment] Taro.requestPayment 失败！');
+          console.error('='.repeat(60));
+          console.error('[Payment] 错误对象:', JSON.stringify(err, null, 2));
+          console.error('[Payment] errMsg:', err.errMsg);
+          console.error('[Payment] errCode:', err.errCode);
+          console.error('='.repeat(60));
+          console.error('\n');
+          
+          // 📱 在手机上显示明显的错误提示
+          const errorTitle = err.errMsg?.includes('no permission') 
+            ? '不支持支付' 
+            : '支付失败';
+          const errorMessage = err.errMsg 
+            ? err.errMsg.replace('requestPayment:fail ', '') 
+            : '未知错误';
+          
+          console.log('[Payment] 准备显示错误提示:', errorTitle, errorMessage);
+          
+          // 延迟显示，确保日志先输出
+          setTimeout(() => {
+            Taro.showModal({
+              title: errorTitle,
+              content: errorMessage,
+              showCancel: false,
+              confirmText: '确定'
+            });
+          }, 100);
+          
           payErrorMsg = err.errMsg || JSON.stringify(err);
 
           // 用户主动取消
@@ -200,9 +289,11 @@ export async function requestPayment(planType: PlanType): Promise<PaymentResult>
             err.errMsg?.includes('chooseImage') || // 某些场景下 cancel 会被截断
             err.errMsg === 'requestPayment:fail cancel'
           ) {
+            console.warn('[Payment] 👋 用户取消了支付');
             payCancelled = true;
             resolve(); // 取消不抛异常
           } else {
+            console.error('[Payment] ❌ 支付失败（非用户取消）');
             reject(err); // 真正的失败抛异常
           }
         },

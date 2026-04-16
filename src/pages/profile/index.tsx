@@ -123,6 +123,12 @@ export default function ProfilePage() {
       case 'orders':
         Taro.navigateTo({ url: '/pages/orders/index' })
         break
+      case 'test-pay':
+        Taro.navigateTo({ url: '/pages/test-pay/index' })
+        break
+      case 'diagnose':
+        Taro.navigateTo({ url: '/pages/diagnose/index' })
+        break
       case 'feedback':
         setShowFeedback(true)
         break
@@ -267,6 +273,26 @@ export default function ProfilePage() {
           <View className='menu-left'>
             <Text className='menu-title'>用户反馈</Text>
             <Text className='menu-desc'>帮助我们改进产品体验</Text>
+          </View>
+          <Text className='arrow-icon'>›</Text>
+        </View>
+        <View className='menu-divider' />
+
+        {/* 支付诊断（开发工具） */}
+        <View className='menu-item diagnose-item' onClick={() => handleMenuClick('diagnose')}>
+          <View className='menu-left'>
+            <Text className='menu-title'>🔍 支付诊断</Text>
+            <Text className='menu-desc'>检测微信支付配置是否正确</Text>
+          </View>
+          <Text className='arrow-icon'>›</Text>
+        </View>
+        <View className='menu-divider' />
+
+        {/* 支付测试（开发工具） */}
+        <View className='menu-item diagnose-item' onClick={() => handleMenuClick('test-pay')}>
+          <View className='menu-left'>
+            <Text className='menu-title'>🧪 支付测试</Text>
+            <Text className='menu-desc'>完整测试支付流程并查看详细日志</Text>
           </View>
           <Text className='arrow-icon'>›</Text>
         </View>
