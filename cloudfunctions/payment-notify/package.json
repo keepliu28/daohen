@@ -1,7 +1,7 @@
 {
-  "name": "payment",
-  "version": "3.0.0",
-  "description": "道痕Pro会员微信支付云函数（原生 V3 API，无第三方 SDK）",
+  "name": "payment-notify",
+  "version": "1.0.0",
+  "description": "微信支付回调云函数（V3）",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

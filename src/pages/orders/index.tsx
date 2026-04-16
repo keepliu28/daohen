@@ -1,96 +1,115 @@
-import { useState, useEffect } from 'react'
-import { View, Text, Image, ScrollView } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
-import './index.scss'
+import { useState, useEffect } from 'react';
+import { View, Text, ScrollView } from '@tarojs/components';
+import Taro, { useDidShow } from '@tarojs/taro';
+import { getOpenId } from '../../utils/storage';
+import './index.scss';
 
 interface OrderItem {
-  _id: string
-  planType: 'daily' | 'monthly' | 'yearly'
-  durationMonths: number
-  durationDays: number
-  price: number
-  isTestMode: boolean
-  status: 'pending' | 'paid' | 'failed' | 'refunded'
-  createTime: string
-  payTime: string | null
-  transactionId: string | null
+  _id: string;
+  planType: 'daily' | 'monthly' | 'yearly';
+  durationMonths: number;
+  durationDays: number;
+  price: number;
+  isTestMode: boolean;
+  status: 'pending' | 'paid' | 'failed' | 'refunded';
+  createTime: string;
+  payTime: string | null;
+  transactionId: string | null;
+  prepayId?: string | null;
+  error?: string | null;
 }
 
-const PLAN_LABELS = {
+const PLAN_LABELS: Record<string, { name: string; color: string; icon: string }> = {
   daily: { name: '体验会员', color: '#FF9500', icon: '🧪' },
   monthly: { name: '月度Pro', color: '#007AFF', icon: '📅' },
-  yearly: { name: '年度Pro', color: '#34C759', icon: '📆' }
-}
+  yearly: { name: '年度Pro', color: '#34C759', icon: '📆' },
+};
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; bg: string }
+> = {
   pending: { label: '待支付', color: '#FF9500', bg: '#FFF5E6' },
   paid: { label: '已支付', color: '#34C759', bg: '#E6F9ED' },
   failed: { label: '失败', color: '#FF3B30', bg: '#FFE6E6' },
-  refunded: { label: '已退款', color: '#8E8E93', bg: '#F2F2F7' }
-}
+  refunded: { label: '已退款', color: '#8E8E93', bg: '#F2F2F7' },
+};
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<OrderItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'paid'>('all')
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'paid'>('all');
 
   useDidShow(() => {
-    loadOrders()
-  })
+    loadOrders();
+  });
 
   const loadOrders = async () => {
     try {
-      setLoading(true)
-      const db = Taro.cloud.database()
-      
-      // 获取当前用户openid
-      const { result } = await Taro.cloud.callFunction({
-        name: 'login'
-      })
-      const openid = result?.data?.openid
+      setLoading(true);
+
+      // 优先从本地存储获取 openid（避免重复调用云函数）
+      let openid = getOpenId();
 
       if (!openid) {
-        console.warn('[Orders] 未登录')
-        return
+        // 本地没有，调用 login 云函数获取
+        const loginRes = await Taro.cloud.callFunction({
+          name: 'login',
+          data: { action: 'login' },
+        });
+        const loginData = (loginRes as any).result?.data;
+        openid = loginData?.openid;
+        console.log('[Orders] 通过 login 云函数获取 openid:', openid);
+      }
+
+      if (!openid) {
+        console.warn('[Orders] 未获取到 openid');
+        setOrders([]);
+        return;
       }
 
       // 查询用户的所有订单（按时间倒序）
-      const res = await db.collection('orders')
+      const db = Taro.cloud.database();
+      const res = await db
+        .collection('orders')
         .where({ openid })
         .orderBy('createTime', 'desc')
-        .get()
+        .limit(50) // 限制最多50条
+        .get();
 
-      setOrders(res.data as OrderItem[])
+      console.log('[Orders] 查询到订单数:', res.data.length);
+      setOrders(res.data as OrderItem[]);
     } catch (error) {
-      console.error('[Orders] 加载订单失败:', error)
-      Taro.showToast({
-        title: '加载失败',
-        icon: 'none'
-      })
+      console.error('[Orders] 加载订单失败:', error);
+      Taro.showToast({ title: '加载失败', icon: 'none' });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // 过滤订单
-  const filteredOrders = orders.filter(order => {
-    if (activeTab === 'all') return true
-    if (activeTab === 'pending') return order.status === 'pending'
-    if (activeTab === 'paid') return order.status === 'paid'
-    return true
-  })
+  const filteredOrders = orders.filter((order) => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'pending') return order.status === 'pending';
+    if (activeTab === 'paid') return order.status === 'paid';
+    return true;
+  });
 
   // 格式化时间
   const formatTime = (timeStr: string) => {
-    if (!timeStr) return '-'
-    const date = new Date(timeStr)
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-  }
+    if (!timeStr) return '-';
+    const date = new Date(timeStr);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+      date.getDate()
+    ).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(
+      date.getMinutes()
+    ).padStart(2, '0')}`;
+  };
 
   // 格式化价格
   const formatPrice = (priceInCents: number) => {
-    return (priceInCents / 100).toFixed(2)
-  }
+    return (priceInCents / 100).toFixed(2);
+  };
 
   // 点击订单查看详情
   const handleOrderClick = (order: OrderItem) => {
@@ -103,12 +122,15 @@ export default function OrdersPage() {
         `状态：${STATUS_CONFIG[order.status]?.label}`,
         `创建时间：${formatTime(order.createTime)}`,
         order.payTime ? `支付时间：${formatTime(order.payTime)}` : '',
-        order.transactionId ? `交易号：${order.transactionId}` : ''
-      ].filter(Boolean).join('\n'),
+        order.transactionId ? `交易号：${order.transactionId}` : '',
+        order.error ? `错误信息：${order.error}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
       showCancel: false,
-      confirmText: '知道了'
-    })
-  }
+      confirmText: '知道了',
+    });
+  };
 
   return (
     <View className='orders-page'>
@@ -120,26 +142,30 @@ export default function OrdersPage() {
 
       {/* Tab 切换 */}
       <View className='tabs'>
-        <View 
+        <View
           className={`tab-item ${activeTab === 'all' ? 'active' : ''}`}
           onClick={() => setActiveTab('all')}
         >
           <Text>全部</Text>
           <View className='tab-badge'>{orders.length}</View>
         </View>
-        <View 
+        <View
           className={`tab-item ${activeTab === 'pending' ? 'active' : ''}`}
           onClick={() => setActiveTab('pending')}
         >
           <Text>待支付</Text>
-          <View className='tab-badge'>{orders.filter(o => o.status === 'pending').length}</View>
+          <View className='tab-badge'>
+            {orders.filter((o) => o.status === 'pending').length}
+          </View>
         </View>
-        <View 
+        <View
           className={`tab-item ${activeTab === 'paid' ? 'active' : ''}`}
           onClick={() => setActiveTab('paid')}
         >
           <Text>已完成</Text>
-          <View className='tab-badge'>{orders.filter(o => o.status === 'paid').length}</View>
+          <View className='tab-badge'>
+            {orders.filter((o) => o.status === 'paid').length}
+          </View>
         </View>
       </View>
 
@@ -157,8 +183,8 @@ export default function OrdersPage() {
           </View>
         ) : (
           filteredOrders.map((order) => (
-            <View 
-              key={order._id} 
+            <View
+              key={order._id}
               className='order-card'
               onClick={() => handleOrderClick(order)}
             >
@@ -174,18 +200,17 @@ export default function OrdersPage() {
                     </Text>
                     <Text className='plan-desc'>
                       {order.isTestMode ? '测试模式 · ' : ''}
-                      {order.durationDays > 0 
-                        ? `${order.durationDays}天` 
-                        : `${order.durationMonths}个月`
-                      }
+                      {order.durationDays > 0
+                        ? `${order.durationDays}天`
+                        : `${order.durationMonths}个月`}
                     </Text>
                   </View>
                 </View>
-                <View 
+                <View
                   className='status-tag'
-                  style={{ 
+                  style={{
                     backgroundColor: STATUS_CONFIG[order.status]?.bg,
-                    color: STATUS_CONFIG[order.status]?.color
+                    color: STATUS_CONFIG[order.status]?.color,
                   }}
                 >
                   <Text>{STATUS_CONFIG[order.status]?.label}</Text>
@@ -198,40 +223,35 @@ export default function OrdersPage() {
                   <Text className='price-label'>实付金额</Text>
                   <Text className='price-value'>¥{formatPrice(order.price)}</Text>
                 </View>
-                
+
                 <View className='order-meta'>
-                  <Text className='meta-item'>
-                    订单号：{order._id.slice(-8)}
-                  </Text>
-                  <Text className='meta-item'>
-                    {formatTime(order.createTime)}
-                  </Text>
+                  <Text className='meta-item'>订单号：{order._id.slice(-12)}</Text>
+                  <Text className='meta-item'>{formatTime(order.createTime)}</Text>
                 </View>
               </View>
 
               {/* 底部操作 */}
               {order.status === 'pending' && (
                 <View className='card-footer'>
-                  <Text className='action-btn cancel'>取消订单</Text>
-                  <Text 
-                    className='action-btn primary'
+                  <Text
+                    className='action-btn secondary'
                     onClick={(e) => {
-                      e.stopPropagation()
-                      Taro.navigateTo({ url: '/pages/pro/index' })
+                      e.stopPropagation();
+                      Taro.navigateTo({ url: '/pages/pro/index' });
                     }}
                   >
-                    立即支付
+                    重新支付
                   </Text>
                 </View>
               )}
 
               {order.status === 'paid' && (
                 <View className='card-footer'>
-                  <Text 
+                  <Text
                     className='action-btn secondary'
                     onClick={(e) => {
-                      e.stopPropagation()
-                      Taro.navigateTo({ url: '/pages/profile/index' })
+                      e.stopPropagation();
+                      Taro.navigateTo({ url: '/pages/profile/index' });
                     }}
                   >
                     查看权益
@@ -247,9 +267,9 @@ export default function OrdersPage() {
       {!loading && orders.length > 0 && (
         <View className='footer-tip'>
           <Text>· 如有疑问请联系客服</Text>
-          <Text>· 测试订单24小时后自动失效</Text>
+          <Text>· 支付成功后会立即开通 Pro</Text>
         </View>
       )}
     </View>
-  )
+  );
 }
