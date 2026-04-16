@@ -18,9 +18,19 @@ const API_KEY = '1qaz2wsx3edc4rfv5tgb6yhn7ujm8ikl';
 const SERIAL_NO = '50705023C38D8B39A5A4050F61052AB9E371CC14';
 
 // ⚠️ 【重要】部署 payment-notify 云函数后，在此填入其 HTTP 触发 URL
-// 格式: https://${envId}.env.${region}.tcapi.run/payment-notify
-// 例如: https://abcdef-1a2b3c.env.cn-shanghai.tcapi.run/payment-notify
-const NOTIFY_URL = 'https://YOUR_ENV_ID.env.YOUR_REGION.tcapi.run/payment-notify';
+// 格式：https://${envId}.env.${region}.tcapi.run/payment-notify
+// 例如：https://abcdef-1a2b3c.env.cn-shanghai.tcapi.run/payment-notify
+// 
+// 📌 当前状态：
+// - 留空或不填：微信不会发送回调通知（前端需主动调用 queryOrder 查询）
+// - 填真实地址：微信支付成功后会自动回调该地址
+const NOTIFY_URL = '';
+
+// 🧪 测试模式：
+// true  = 模拟支付（跳过微信API，直接激活Pro，不产生真实扣款）
+// false = 真实支付（调用微信API，产生真实扣款）
+// 用途：开发测试阶段使用true，正式发布前改为false
+const TEST_MODE = false; // ✅ 已上线：关闭测试模式，启用真实支付
 
 const PRIVATE_KEY = `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDBY+33arAGQ3yq
@@ -55,7 +65,7 @@ R1l/qsiHiShKqrYOjwzOjiE=
 const PRICE_PLANS = {
   daily: { durationDays: 1, price: 1, isTestMode: true, label: '体验会员1天' },
   monthly: { durationMonths: 1, price: 190, label: '月度Pro' },
-  yearly: { durationMonths: 12, price: 1990, label: '年度Pro' },
+  yearly: { durationMonths: 12, price: 1990, label: '年度Pro', originalPrice: 2280, saving: '省13%' },
 };
 
 // ---------------------------------------------------------------------------
@@ -90,9 +100,10 @@ function httpsRequest(options, postData) {
       res.on('data', (chunk) => { data += chunk; });
       res.on('end', () => {
         try {
-          resolve(JSON.parse(data));
+          const parsed = JSON.parse(data);
+          resolve({ status: res.statusCode, data: parsed });
         } catch {
-          resolve(data);
+          resolve({ status: res.statusCode, data });
         }
       });
     });
@@ -110,9 +121,6 @@ function httpsRequest(options, postData) {
 
 /**
  * 发送微信支付 V3 API 请求（原生实现，不依赖第三方 SDK）
- * @param {string} method - GET/POST
- * @param {string} path - API 路径，如 /v3/pay/transactions/jsapi
- * @param {object|null} params - 请求体参数
  */
 async function wxPayRequest(method, path, params) {
   const timestamp = Math.floor(Date.now() / 1000).toString();
@@ -123,10 +131,8 @@ async function wxPayRequest(method, path, params) {
   // 格式：HTTP_METHOD\n + URL_PATH\n + TIMESTAMP\n + NONCE\n + BODY\n
   const signParts = [method, path, timestamp, nonce];
   if (body) signParts.push(body);
-  signParts.push(''); // 末尾空行
+  signParts.push('');
   const signStr = signParts.join('\n');
-
-  console.log(`[wxPayRequest] 签名原文:`, signStr.replace(/\n/g, '\\n'));
 
   // RSA 签名
   const signature = rsaSign(signStr);
@@ -148,7 +154,7 @@ async function wxPayRequest(method, path, params) {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      authorization,  // ✅ 修复：使用小写变量名
+      authorization,
       'User-Agent': 'daohen-payment/1.0',
     },
   };
@@ -156,16 +162,46 @@ async function wxPayRequest(method, path, params) {
   console.log(`[wxPayRequest] ${method} ${path}`);
   console.log(`[wxPayRequest] Authorization: ${authorization.substring(0, 60)}...`);
 
-  let result;
-  try {
-    result = await httpsRequest(requestOptions, body);
-  } catch (e) {
-    console.error(`[wxPayRequest] ❌ 网络请求失败: ${e.message}`);
-    throw e;
+  const result = await httpsRequest(requestOptions, body);
+  
+  // ✅ 修复问题2：正确处理 V3 API 返回格式
+  // V3 API 成功返回 HTTP 200 + { prepay_id: "..." }
+  // V3 API 失败返回 HTTP 4xx/5xx + { code: "ERROR_CODE", message: "..." }
+  if (result.status >= 200 && result.status < 300 && result.data.prepay_id) {
+    return result.data;
+  } else if (result.status >= 400) {
+    // HTTP 错误状态码，抛出异常让调用方处理
+    throw new Error(`API错误(${result.status}): ${JSON.stringify(result.data)}`);
+  } else {
+    // 其他情况也视为失败
+    throw new Error(`未知响应: status=${result.status}, data=${JSON.stringify(result.data)}`);
   }
+}
 
-  console.log(`[wxPayRequest] Response:`, JSON.stringify(result).substring(0, 300));
-  return result;
+/**
+ * 错误码友好提示映射
+ */
+function getFriendlyErrorMessage(errorMsg) {
+  if (!errorMsg) return '未知错误';
+  
+  const errorMap = {
+    'SIGN_ERROR': '签名配置错误，请检查商户私钥',
+    'SIGNATURE_INVALID': '签名无效，请检查证书配置',
+    'CERTIFICATE_ERROR': '证书序列号错误',
+    'PARAM_ERROR': '参数配置错误',
+    'access denied': '支付权限未开通，请在商户平台检查AppID绑定',
+    'NO_AUTH': '无权限调用此接口',
+    'NOT_ENOUGH': '余额不足',
+    'ORDERPAID': '订单已支付',
+    'ORDERCLOSED': '订单已关闭',
+    'SYSTEMERROR': '系统繁忙，请稍后重试',
+  };
+  
+  for (const [code, msg] of Object.entries(errorMap)) {
+    if (errorMsg.includes(code)) return `${msg}（${errorMsg}）`;
+  }
+  
+  return errorMsg;
 }
 
 // ---------------------------------------------------------------------------
@@ -227,13 +263,24 @@ async function createOrder(openid, data) {
     if (recentOrders.data.length > 0) {
       const latest = recentOrders.data[0];
       const age = Date.now() - new Date(latest.createTime).getTime();
-      if (age < 10 * 60 * 1000 && latest.prepayId) {
+      if (age < 10 * 60 * 1000) {
         console.log(`[createOrder] 复用未支付订单: ${latest._id}，age=${Math.round(age / 1000)}s`);
-        const params = generateAppPayParams(latest.prepayId);
-        return {
-          success: true,
-          data: { orderId: latest._id, ...params },
-        };
+        
+        // ✅ 修复问题5：测试模式下复用订单也要能正常工作
+        if (TEST_MODE || latest.isMockOrder) {
+          return {
+            success: true,
+            data: { orderId: latest._id, _testMode: true, _mockPaid: latest.status === 'paid' },
+          };
+        }
+        
+        if (latest.prepayId) {
+          const params = generateAppPayParams(latest.prepayId);
+          return {
+            success: true,
+            data: { orderId: latest._id, ...params },
+          };
+        }
       }
     }
 
@@ -258,13 +305,43 @@ async function createOrder(openid, data) {
     });
     console.log(`[createOrder] 本地订单已创建: ${orderId}`);
 
-    // 3. 调用微信支付 JSAPI 下单
+    // 3. 【测试模式】✅ 修复问题1 & 问题5：直接激活Pro，不调微信API
+    if (TEST_MODE) {
+      console.log(`[createOrder] 🧪 测试模式：模拟支付成功，直接激活 Pro`);
+      
+      // 标记订单为已支付（模拟）
+      await db.collection('orders').doc(orderId).update({
+        data: { 
+          status: 'paid',
+          isMockOrder: true,
+          transactionId: `MOCK_${Date.now()}`,
+          payTime: db.serverDate(),
+          updateTime: db.serverDate() 
+        },
+      });
+      
+      // 直接激活 Pro 会员
+      const activated = await activateProFromOrder(orderId);
+      
+      return {
+        success: true,
+        data: { 
+          orderId, 
+          _testMode: true, 
+          _mockPaid: true,
+          proActivated: activated,
+          message: activated ? '测试模式：Pro 已开通' : '测试模式：开通失败'
+        },
+      };
+    }
+
+    // 4. 调用微信支付 JSAPI 下单（真实支付）
     const wxParams = {
       appid: APP_ID,
       mchid: MCH_ID,
       description: plan.label,
       out_trade_no: orderId,
-      notify_url: NOTIFY_URL,
+      notify_url: NOTIFY_URL || undefined,
       amount: {
         total: plan.price,
         currency: 'CNY',
@@ -279,33 +356,24 @@ async function createOrder(openid, data) {
       wxResult = await wxPayRequest('POST', '/v3/pay/transactions/jsapi', wxParams);
     } catch (wxError) {
       console.error(`[createOrder] ❌ 微信下单失败:`, wxError.message);
+      
+      // ✅ 修复问题6：使用友好的错误提示
+      const friendlyMsg = getFriendlyErrorMessage(wxError.message);
+      
       await db.collection('orders').doc(orderId).update({
         data: {
           status: 'failed',
-          error: wxError.message,
+          error: friendlyMsg,
           updateTime: db.serverDate(),
         },
       });
       return {
         success: false,
-        error: `微信支付下单失败: ${wxError.message}`,
+        error: friendlyMsg,
       };
     }
 
-    // 4. 检查微信返回
-    if (wxResult.code || (wxResult.return_code && wxResult.return_code !== 'SUCCESS')) {
-      const errMsg = wxResult.message || wxResult.err_code_des || JSON.stringify(wxResult);
-      console.error(`[createOrder] ❌ 微信返回错误:`, errMsg);
-      await db.collection('orders').doc(orderId).update({
-        data: {
-          status: 'failed',
-          error: errMsg,
-          updateTime: db.serverDate(),
-        },
-      });
-      return { success: false, error: `微信支付: ${errMsg}` };
-    }
-
+    // ✅ 修复问题2：这里不需要再判断了，因为 wxPayRequest 已经处理好了
     const prepayId = wxResult.prepay_id;
     if (!prepayId) {
       console.error(`[createOrder] ❌ 未获取到 prepay_id:`, JSON.stringify(wxResult));
@@ -367,42 +435,79 @@ async function queryOrderByWxApi(orderId) {
     const localOrder = dbRes.data;
 
     // 已终态直接返回（减少微信 API 调用）
-    if (localOrder.status === 'paid' || localOrder.status === 'failed') {
+    if (localOrder.status === 'paid') {
+      return { 
+        success: true, 
+        data: {
+          ...localOrder,
+          wxTradeState: 'SUCCESS',
+          proActivated: true,
+        }
+      };
+    }
+    
+    if (localOrder.status === 'failed') {
       return { success: true, data: localOrder };
     }
 
-    // 微信侧已是终态但本地未更新 → 触发激活
-    if (localOrder.transactionId) {
-      try {
-        const wxRes = await wxPayRequest(
-          'GET',
-          `/v3/pay/transactions/id/${localOrder.transactionId}?mchid=${MCH_ID}`,
-          null
-        );
-        console.log(`[queryOrder] 微信查询结果: trade_state=${wxRes.trade_state}`);
+    // ✅ 修复问题5：测试模式的订单查询
+    if (TEST_MODE && localOrder.isMockOrder) {
+      console.log(`[queryOrder] 🧪 测试模式订单: ${orderId}, status=${localOrder.status}`);
+      return {
+        success: true,
+        data: {
+          ...localOrder,
+          wxTradeState: localOrder.status === 'paid' ? 'SUCCESS' : 'NOTPAY',
+          wxTradeStateDesc: localOrder.status === 'paid' ? '模拟支付成功' : '等待支付',
+          _testMode: true,
+        },
+      };
+    }
 
-        if (wxRes.trade_state === 'SUCCESS' && localOrder.status === 'pending') {
-          console.log(`[queryOrder] 微信已支付，激活 Pro: ${orderId}`);
-          await activateProFromOrder(orderId);
-        }
+    // 真实支付：调用微信 API 查询
+    let wxRes;
+    try {
+      wxRes = await wxPayRequest(
+        'GET',
+        `/v3/pay/transactions/out-trade-no/${orderId}?mchid=${MCH_ID}`,
+        null
+      );
+      console.log(`[queryOrder] 微信查询: trade_state=${wxRes.trade_state}`);
+    } catch (wxError) {
+      console.warn(`[queryOrder] 微信查询失败，降级返回本地状态:`, wxError.message);
+      return { success: true, data: localOrder, warning: getFriendlyErrorMessage(wxError.message) };
+    }
 
-        return {
-          success: true,
+    const tradeState = wxRes.trade_state;
+    const tradeStateDesc = wxRes.trade_state_desc || '';
+    let activated = false;
+
+    // 微信侧已支付 → 激活 Pro
+    if (tradeState === 'SUCCESS' && localOrder.status === 'pending') {
+      console.log(`[queryOrder] ✅ 微信已支付，激活 Pro: ${orderId}`);
+      activated = await activateProFromOrder(orderId);
+
+      // 保存 transactionId
+      if (wxRes.transaction_id && !localOrder.transactionId) {
+        await db.collection('orders').doc(orderId).update({
           data: {
-            ...localOrder,
-            wxTradeState: wxRes.trade_state,
-            wxTradeStateDesc: wxRes.trade_state_desc,
-            updated: true,
+            transactionId: wxRes.transaction_id,
+            updateTime: db.serverDate(),
           },
-        };
-      } catch (wxError) {
-        console.warn(`[queryOrder] 微信查询失败，降级返回本地状态:`, wxError.message);
-        return { success: true, data: localOrder, warning: wxError.message };
+        });
       }
     }
 
-    // 无 transactionId（可能 prepayId 未使用）直接返回本地状态
-    return { success: true, data: localOrder };
+    return {
+      success: true,
+      data: {
+        ...localOrder,
+        wxTradeState: tradeState,
+        wxTradeStateDesc: tradeStateDesc,
+        proActivated: activated,
+        updated: true,
+      },
+    };
   } catch (error) {
     console.error(`[queryOrder] ❌ 查询失败:`, error);
     return { success: false, error: error.message };
@@ -410,7 +515,7 @@ async function queryOrderByWxApi(orderId) {
 }
 
 // ---------------------------------------------------------------------------
-// 从订单激活 Pro（核心业务逻辑）
+// 从订单激活 Pro（核心业务逻辑）✅ 修复问题3
 // ---------------------------------------------------------------------------
 
 async function activateProFromOrder(orderId) {
@@ -422,16 +527,27 @@ async function activateProFromOrder(orderId) {
     const { openid, planType, durationMonths, durationDays } = order;
     const now = Date.now();
 
+    // ✅ 修复问题3：同时支持天数和月数计算
     let newExpiry;
+    
     if (durationDays > 0) {
+      // 天卡：按天计算
       newExpiry = now + durationDays * 24 * 60 * 60 * 1000;
-    } else {
+      console.log(`[activateProFromOrder] 📅 天卡模式：${durationDays}天`);
+    } else if (durationMonths > 0) {
+      // 月卡：按月计算（每月30天）
       newExpiry = now + durationMonths * 30 * 24 * 60 * 60 * 1000;
+      console.log(`[activateProFromOrder] 📅 月卡模式：${durationMonths}个月`);
+    } else {
+      // 默认：1个月
+      newExpiry = now + 30 * 24 * 60 * 60 * 1000;
+      console.log(`[activateProFromOrder] 📅 默认模式：1个月`);
     }
 
     const userRes = await db.collection('users').where({ openid }).limit(1).get();
 
     if (userRes.data.length === 0) {
+      // 新用户：直接创建
       await db.collection('users').add({
         data: {
           openid,
@@ -443,13 +559,25 @@ async function activateProFromOrder(orderId) {
       });
       console.log(`[activateProFromOrder] ✅ 新用户开通 Pro，过期: ${new Date(newExpiry).toLocaleString()}`);
     } else {
+      // 老用户：续期（✅ 修复问题3：正确计算续期时间）
       const user = userRes.data[0];
       const existingExpiry = user.proExpiry || 0;
-      // 累加模式：当前 Pro 未过期则叠加
-      const finalExpiry =
-        existingExpiry > now
-          ? existingExpiry + durationMonths * 30 * 24 * 60 * 60 * 1000
-          : newExpiry;
+      
+      let finalExpiry;
+      
+      if (existingExpiry > now) {
+        // 当前 Pro 未过期 → 叠加时长
+        if (durationDays > 0) {
+          finalExpiry = existingExpiry + durationDays * 24 * 60 * 60 * 1000;
+        } else {
+          finalExpiry = existingExpiry + (durationMonths || 1) * 30 * 24 * 60 * 60 * 1000;
+        }
+        console.log(`[activateProFromOrder] 📅 续期叠加，新过期: ${new Date(finalExpiry).toLocaleString()}`);
+      } else {
+        // 当前 Pro 已过期 → 从现在开始算
+        finalExpiry = newExpiry;
+        console.log(`[activateProFromOrder] 📅 重新开通，过期: ${new Date(finalExpiry).toLocaleString()}`);
+      }
 
       await db.collection('users').doc(user._id).update({
         data: {
@@ -458,9 +586,9 @@ async function activateProFromOrder(orderId) {
           updateTime: db.serverDate(),
         },
       });
-      console.log(`[activateProFromOrder] ✅ 续期 Pro，过期: ${new Date(finalExpiry).toLocaleString()}`);
     }
 
+    // 更新订单状态为已支付
     await db.collection('orders').doc(orderId).update({
       data: {
         status: 'paid',

@@ -137,14 +137,44 @@ export async function requestPayment(planType: PlanType): Promise<PaymentResult>
     };
   }
 
-  const { orderId, ...paymentParams } = orderResult.data as PaymentParams & {
+  const { orderId, _testMode, ...paymentParams } = orderResult.data as PaymentParams & {
     orderId: string;
+    _testMode?: boolean;
   };
 
   console.log(
-    `[Payment] 📋 订单已创建: ${orderId}, paymentParams:`,
+    `[Payment] 📋 订单已创建: ${orderId}, 测试模式: ${_testMode}, paymentParams:`,
     JSON.stringify(paymentParams)
   );
+
+  // 【测试模式】跳过微信支付弹窗，直接模拟成功
+  if (_testMode) {
+    console.log('[Payment] 🧪 测试模式：跳过微信支付弹窗，模拟支付成功');
+    
+    // 模拟用户确认支付
+    await new Promise(resolve => setTimeout(resolve, 500)); // 模拟网络延迟
+    
+    console.log('[Payment] ✅ 测试模式：模拟支付完成，开始查询订单');
+    
+    // 直接查询订单（会触发 Pro 激活）
+    const queryResult = await callPaymentCloudFunction('queryOrder', {
+      data: { orderId },
+    });
+
+    if (queryResult.success && queryResult.data?.proActivated) {
+      return {
+        success: true,
+        orderId,
+        message: '测试支付成功，Pro 已激活',
+      };
+    }
+
+    return {
+      success: true,
+      orderId,
+      message: '测试支付完成',
+    };
+  }
 
   // 2. 调用微信支付 API（调起小程序支付）
   let paySuccess = false;
@@ -249,13 +279,15 @@ export async function requestPayment(planType: PlanType): Promise<PaymentResult>
   }
 
   // 5. 判断最终结果
-  if (finalStatus.status === 'paid') {
-    console.log(`[Payment] ✅ 支付完成! orderId: ${orderId}`);
+  if (finalStatus.status === 'paid' || finalStatus.proActivated) {
+    console.log(`[Payment] ✅ 支付完成! Pro已激活: ${orderId}`);
     Taro.showToast({
-      title: '🎉 开通成功',
+      title: '🎉 Pro开通成功',
       icon: 'success',
       duration: 2500,
     });
+    // 注：Pro 状态刷新由用户手动触发（如返回个人中心页面时会重新获取）
+
     return {
       success: true,
       orderId,
@@ -264,12 +296,22 @@ export async function requestPayment(planType: PlanType): Promise<PaymentResult>
   }
 
   if (finalStatus.wxTradeState === 'SUCCESS') {
-    // 微信侧已付，本地 pending → 等待回调激活
-    console.log(`[Payment] ⏳ 微信已支付，订单激活中: ${orderId}`);
+    // 微信已付钱，激活中（服务端正在处理）
+    console.log(`[Payment] ⏳ 微信已支付，Pro激活中: ${orderId}`);
+    Taro.showToast({ title: '🎉 支付成功，Pro开通中...', icon: 'success', duration: 2000 });
     return {
       success: true,
       orderId,
-      message: '支付成功，会员开通中...',
+      message: '支付成功，Pro开通中...',
+    };
+  }
+
+  if (finalStatus.wxTradeState === 'USERPAYING') {
+    console.log(`[Payment] ⏳ 微信支付中: ${orderId}`);
+    return {
+      success: true,
+      orderId,
+      message: '支付中，请稍候...',
     };
   }
 
